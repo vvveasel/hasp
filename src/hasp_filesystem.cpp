@@ -2,7 +2,7 @@
    For full license information read the LICENSE file in the project folder */
 
 #ifdef ARDUINO
-#include <Arduino.h>
+//#include <Arduino.h>
 #include "ArduinoLog.h"
 #include "FS.h"
 #endif
@@ -24,7 +24,7 @@
 #define HASP_PAGES_JSONL "{\"page\":1,\"id\":10,\"w\":240,\"obj\":\"label\",\"text\":\"%hostname%\"}"
 #endif
 
-#include <Arduino.h>
+//#include <Arduino.h>
 #include "ArduinoJson.h"
 #include "ArduinoLog.h"
 

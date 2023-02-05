@@ -2,8 +2,8 @@
    For full license information read the LICENSE file in the project folder */
 
 #include "hasplib.h"
-#include "dev/device.h"
-#include "drv/tft/tft_driver.h"
+//#include "dev/device.h"
+//#include "drv/tft/tft_driver.h"
 // #include "lv_datetime.h"
 #include "hasp_gui.h"
 
@@ -248,7 +248,8 @@ void hasp_antiburn_cb(lv_task_t* task)
                 if(area.x2 > scr_w) area.x2 = scr_w;
 
                 size_t offset = headroom ? HASP_RANDOM(headroom) : 0;
-                haspTft.flush_pixels(disp_drv, &area, color + offset);
+                //haspTft.flush_pixels(disp_drv, &area, color + offset);    TODO: Implement flush_pixels function
+                lv_disp_flush_ready(disp_drv);  //TODO: this has to be inside flush_pixels
                 area.x1 += w;
             }
 

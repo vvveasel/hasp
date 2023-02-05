@@ -7,8 +7,8 @@
 // #include "ArduinoLog.h"
 #include "hasplib.h"
 
-#include "dev/device.h"
-#include "drv/tft/tft_driver.h"
+//#include "dev/device.h"
+//#include "drv/tft/tft_driver.h"
 
 // #include "hasp_gui.h"
 
@@ -1274,7 +1274,7 @@ void dispatch_statusupdate(const char*, const char*, uint8_t source)
         // #endif
 
         snprintf_P(buffer, sizeof(buffer), PSTR("\"tftDriver\":\"%s\",\"tftWidth\":%u,\"tftHeight\":%u}"),
-                   haspTft.get_tft_model(), haspTft.width(), haspTft.height());
+                   "MY DISPLAY", TFT_WIDTH, TFT_HEIGHT);    //TODO: Report actual display model
         strcat(data, buffer);
     }
 

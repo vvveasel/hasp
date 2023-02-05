@@ -18,7 +18,6 @@ void* lodepng_realloc(void* ptr, size_t new_size);
 void lodepng_free(void* ptr);
 #endif // LODEPNG_NO_COMPILE_ALLOCATORS
 
-bool hasp_use_psram();
 void* hasp_calloc(size_t num, size_t size);
 void* hasp_malloc(size_t size);
 void* hasp_realloc(void* ptr, size_t new_size);

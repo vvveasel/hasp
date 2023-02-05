@@ -4,7 +4,7 @@ For full license information read the LICENSE file in the project folder */
 #include "hasplib.h"
 #include "hasp_task.h"
 #include "sys/net/hasp_network.h"
-#include "dev/device.h"
+//#include "dev/device.h"
 
 #if HASP_USE_CONFIG > 0
 #include "hasp_debug.h"

@@ -60,8 +60,7 @@ void font_setup()
 #if(HASP_USE_FREETYPE > 0) // initialize the FreeType renderer
 
 #if defined(ARDUINO_ARCH_ESP32)
-    if(lv_freetype_init(LVGL_FREETYPE_MAX_FACES, LVGL_FREETYPE_MAX_SIZES,
-                        hasp_use_psram() ? LVGL_FREETYPE_MAX_BYTES_PSRAM : LVGL_FREETYPE_MAX_BYTES)) {
+    if(lv_freetype_init(LVGL_FREETYPE_MAX_FACES, LVGL_FREETYPE_MAX_SIZES, LVGL_FREETYPE_MAX_BYTES)) {
         LOG_VERBOSE(TAG_FONT, F("FreeType v%d.%d.%d " D_SERVICE_STARTED " = %d"), FREETYPE_MAJOR, FREETYPE_MINOR,
                     FREETYPE_PATCH, hasp_use_psram());
         LOG_DEBUG(TAG_FONT, F("FreeType High Watermark %u"), lv_ft_freetype_high_watermark());

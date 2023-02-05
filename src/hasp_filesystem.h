@@ -4,8 +4,8 @@
 #ifndef HASP_FILESYSTEM_H
 #define HASP_FILESYSTEM_H
 
-#include <Arduino.h>
-#include <FS.h>
+//#include <Arduino.h>
+//#include <FS.h>
 
 bool filesystemSetup(void);
 

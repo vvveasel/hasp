@@ -8,8 +8,8 @@
 
 // Device Drivers
 #include "dev/device.h"
-#include "drv/tft/tft_driver.h"
-#include "drv/touch/touch_driver.h"
+//#include "drv/tft/tft_driver.h"
+//#include "drv/touch/touch_driver.h"
 
 #include "hasp_debug.h"
 #include "hasp_gui.h"
@@ -21,11 +21,6 @@
 
 #if HASP_USE_SPIFFS > 0 || HASP_USE_LITTLEFS > 0
 File pFileOut;
-#endif
-
-#if ESP32
-static SemaphoreHandle_t xGuiSemaphore = NULL;
-static TaskHandle_t g_lvgl_task_handle;
 #endif
 
 #define LVGL_TICK_PERIOD 20
@@ -100,9 +95,10 @@ void gui_hide_pointer(bool hidden)
     if(cursor) lv_obj_set_hidden(cursor, hidden || !gui_settings.show_pointer);
 }
 
-IRAM_ATTR void gui_flush_cb(lv_disp_drv_t* disp, const lv_area_t* area, lv_color_t* color_p)
+void gui_flush_cb(lv_disp_drv_t* disp, const lv_area_t* area, lv_color_t* color_p)
 {
-    haspTft.flush_pixels(disp, area, color_p);
+    // haspTft.flush_pixels(disp, area, color_p);    TODO: Implement flush_pixels function
+        lv_disp_flush_ready(disp);  //TODO: this has to be inside flush_pixels
     screenshotIsDirty = true;
 }
 
@@ -127,56 +123,30 @@ void gui_antiburn_cb(lv_disp_drv_t* disp, const lv_area_t* area, lv_color_t* col
     lv_disp_flush_ready(disp);
 }
 
-IRAM_ATTR void gui_monitor_cb(lv_disp_drv_t* disp_drv, uint32_t time, uint32_t px)
+void gui_monitor_cb(lv_disp_drv_t* disp_drv, uint32_t time, uint32_t px)
 {
     // if(screenshotIsDirty) return;
     LOG_DEBUG(TAG_GUI, F("The Screen is dirty"));
     screenshotIsDirty = true;
 }
 
-IRAM_ATTR bool gui_touch_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data)
+bool gui_touch_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data)
 {
-    return haspTouch.read(indev_driver, data);
+    return true;    //TODO: Implement
 }
 
 void guiCalibrate(void)
-{
-#if TOUCH_DRIVER == 0x2046 //&& defined(USER_SETUP_LOADED)
-    haspTouch.calibrate(gui_settings.cal_data);
-
-    // size_t len = sizeof(gui_settings.cal_data) / sizeof(gui_settings.cal_data[0]);
-    // for(int i = 0; i < len; i++) {
-    //     Serial.print(gui_settings.cal_data[i]);
-    //     if(i < len - 1) Serial.print(", ");
-    // }
-
-    lv_obj_invalidate(lv_disp_get_layer_sys(NULL));
-#endif
-}
+{}  //TODO: Implement
 
 // fast init
 void gui_start_tft(void)
-{
-    /* Setup Backlight Control Pin */
-    haspDevice.set_backlight_pin(gui_settings.backlight_pin);
-
-    haspTft.init(tft_width, tft_height);
-    haspTft.set_rotation(gui_settings.rotation);
-    haspTft.set_invert(gui_settings.invert_display);
-}
+{}  //TODO: Implement
 
 static inline void gui_init_tft(void)
 {
     // Initialize TFT
     LOG_TRACE(TAG_TFT, F(D_SERVICE_STARTING));
-    gui_start_tft();
-    haspTft.show_info();
-
-#ifdef USE_DMA_TO_TFT
-    LOG_VERBOSE(TAG_TFT, F("DMA        : " D_SETTING_ENABLED));
-#else
-    LOG_VERBOSE(TAG_TFT, F("DMA        : " D_SETTING_DISABLED));
-#endif
+    //TODO: Implement
     LOG_INFO(TAG_TFT, F(D_SERVICE_STARTED));
 }
 
@@ -200,7 +170,7 @@ static inline void gui_init_images()
 #endif
 
 #if defined(ARDUINO_ARCH_ESP32)
-    if(hasp_use_psram()) lv_img_cache_set_size(LV_IMG_CACHE_DEF_SIZE_PSRAM);
+    lv_img_cache_set_size(LV_IMG_CACHE_DEF_SIZE);
 #endif
 }
 
@@ -335,13 +305,6 @@ void guiSetup()
     gui_hide_pointer(false);
     lv_indev_set_cursor(mouse_indev, cursor); /*Connect the image  object to the driver*/
 
-#if !(defined(WINDOWS) || defined(POSIX))
-    // drv_touch_init(gui_settings.rotation); // Touch driver
-    haspTouch.init(tft_width, tft_height);
-    haspTouch.set_calibration(gui_settings.cal_data);
-    haspTouch.set_rotation(gui_settings.rotation);
-#endif
-
     /* Initialize Global progress bar*/
     lv_obj_user_data_t udata = (lv_obj_user_data_t){10, 0, 10};
     lv_obj_t* bar            = lv_bar_create(lv_layer_sys(), NULL);
@@ -358,27 +321,12 @@ void guiSetup()
     lv_obj_set_style_local_bg_color(lv_layer_sys(), LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
     lv_obj_set_style_local_bg_opa(lv_layer_sys(), LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_0);
 
-#if defined(ESP32) && defined(HASP_USE_ESP_MQTT)
-    xGuiSemaphore = xSemaphoreCreateMutex();
-    if(!xGuiSemaphore) {
-        LOG_FATAL(TAG_GUI, "Create mutex for LVGL failed");
-    }
-#endif // ESP32 && HASP_USE_ESP_MQTT
-
     LOG_INFO(TAG_LVGL, F(D_SERVICE_STARTED));
 }
 
-IRAM_ATTR void guiLoop(void)
+void guiLoop(void)
 {
     lv_task_handler(); // process animations
-
-#if defined(STM32F4xx)
-    //  tick.update();
-#endif
-
-#if !(defined(WINDOWS) || defined(POSIX))
-    // haspTouch.loop();
-#endif
 }
 
 void guiEverySecond(void)
@@ -420,27 +368,11 @@ esp_err_t gui_setup_lvgl_task()
 
 bool gui_acquire(void)
 {
-#if ESP32
-    TaskHandle_t task = xTaskGetCurrentTaskHandle();
-    if(g_lvgl_task_handle != task) {
-        if(xSemaphoreTake(xGuiSemaphore, pdMS_TO_TICKS(30)) != pdTRUE) {
-            return false;
-        }
-    }
-#endif
     return true;
 }
 
 void gui_release(void)
-{
-#if ESP32
-    TaskHandle_t task = xTaskGetCurrentTaskHandle();
-    if(g_lvgl_task_handle != task) {
-        xSemaphoreGive(xGuiSemaphore);
-        // LOG_VERBOSE(TAG_TFT, F("GIVE"));
-    }
-#endif
-}
+{}
 
 #endif // ESP32 && HASP_USE_ESP_MQTT
 
@@ -489,14 +421,6 @@ bool guiGetConfig(const JsonObject& settings)
             v.set(gui_settings.cal_data[i]);
         } else {
             changed = true;
-
-#if TOUCH_DRIVER == 0x2046 && defined(USER_SETUP_LOADED) && defined(TOUCH_CS)
-            // haspTft.tft.setTouch(gui_settings.cal_data);
-            haspTouch.set_calibration(gui_settings.cal_data);
-#elif TOUCH_DRIVER == 0x2046 && defined(HASP_USE_LGFX_TOUCH)
-            // haspTft.tft.setTouchCalibrate(gui_settings.cal_data);
-            haspTouch.set_calibration(gui_settings.cal_data);
-#endif
         }
         i++;
     }
@@ -508,14 +432,6 @@ bool guiGetConfig(const JsonObject& settings)
             array.add(gui_settings.cal_data[i]);
         }
         changed = true;
-
-#if TOUCH_DRIVER == 0x2046 && defined(USER_SETUP_LOADED) && defined(TOUCH_CS)
-        // haspTft.tft.setTouch(gui_settings.cal_data);
-        haspTouch.set_calibration(gui_settings.cal_data);
-#elif TOUCH_DRIVER == 0x2046 && defined(HASP_USE_LGFX_TOUCH)
-        // haspTft.tft.setTouchCalibrate(gui_settings.cal_data);
-        haspTouch.set_calibration(gui_settings.cal_data);
-#endif
     }
 
     if(changed) configOutput(settings, TAG_GUI);
@@ -585,14 +501,6 @@ bool guiSetConfig(const JsonObject& settings)
             LOG_TRACE(TAG_GUI, F("First Touch Calibration enabled"));
             oobeSetAutoCalibrate(true);
         }
-
-#if TOUCH_DRIVER == 0x2046 && defined(USER_SETUP_LOADED) && defined(TOUCH_CS)
-        // haspTft.tft.setTouch(gui_settings.cal_data);
-        if(status) haspTouch.set_calibration(gui_settings.cal_data);
-#elif TOUCH_DRIVER == 0x2046 && defined(HASP_USE_LGFX_TOUCH)
-        // haspTft.tft.setTouchCalibrate(gui_settings.cal_data);
-        if(status) haspTouch.set_calibration(gui_settings.cal_data);
-#endif
 
         changed |= status;
     }

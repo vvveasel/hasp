@@ -6,39 +6,21 @@
 #include "hasplib.h"
 #include "hasp_mem.h"
 
-#ifdef ESP32
-bool hasp_use_psram()
-{
-    return psramFound() && ESP.getPsramSize() > 0;
-}
-#endif
 
 void* hasp_calloc(size_t num, size_t size)
 {
-#ifdef ESP32
-    return hasp_use_psram() ? ps_calloc(num, size) : calloc(num, size);
-#else
     return calloc(num, size);
-#endif
 }
 
 void* hasp_malloc(size_t size)
 {
-#ifdef ESP32
-    return hasp_use_psram() ? ps_malloc(size) : malloc(size);
-#else
     return malloc(size);
-#endif
 }
 
 /* NOTE: when realloc returns NULL, it leaves the original memory untouched */
 void* hasp_realloc(void* ptr, size_t new_size)
 {
-#ifdef ESP32
-    return hasp_use_psram() ? ps_realloc(ptr, new_size) : realloc(ptr, new_size);
-#else
     return realloc(ptr, new_size);
-#endif
 }
 
 void hasp_free(void* ptr)
