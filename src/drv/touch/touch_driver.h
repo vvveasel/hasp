@@ -51,7 +51,7 @@ class BaseTouch {
 #endif
 
 #if TOUCH_DRIVER == 0x2046 && defined(USER_SETUP_LOADED)
-#warning Building for TFT_eSPI XPT2046
+//#warning Building for TFT_eSPI XPT2046
 //#include "touch_driver_xpt2046.h"
 #include "touch_driver_tftespi.h"
 #elif TOUCH_DRIVER == 0x2046 && defined(LGFX_USE_V1) && defined(HASP_USE_LGFX_TOUCH)

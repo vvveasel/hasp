@@ -488,8 +488,8 @@ void mqttStart()
         LOG_INFO(TAG_MQTT, mqttClientId);
     }
 
-    strncpy(mqttLwtTopic, mqttNodeTopic, sizeof(mqttLwtTopic));
-    strncat_P(mqttLwtTopic, PSTR(MQTT_TOPIC_LWT), sizeof(mqttLwtTopic));
+    strncpy(mqttLwtTopic, mqttNodeTopic, sizeof(mqttNodeTopic));
+    strncat_P(mqttLwtTopic, PSTR(MQTT_TOPIC_LWT), sizeof(mqttLwtTopic)-sizeof(mqttNodeTopic));
     LOG_WARNING(TAG_MQTT, mqttLwtTopic);
 
     mqtt_cfg.event_handle           = mqtt_event_handler;
