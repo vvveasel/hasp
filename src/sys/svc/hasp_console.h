@@ -10,7 +10,7 @@
 
 /* ===== Default Event Processors ===== */
 void consoleSetup();
-IRAM_ATTR void consoleLoop(void);
+void consoleLoop(void);
 void consoleEvery5Seconds(void);
 void consoleEverySecond(void);
 void consoleStart(void);

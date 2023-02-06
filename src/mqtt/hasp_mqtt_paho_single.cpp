@@ -378,7 +378,7 @@ void mqttSetup()
     LOG_DEBUG(TAG_MQTT, "%s %d", __FILE__, __LINE__);
 }
 
-IRAM_ATTR void mqttLoop()
+void mqttLoop()
 {
     int topicLen;
     char* topicName;             // Freed by msgarrvd

@@ -89,7 +89,7 @@ bool mdns_remove_service(char* service, char* proto)
 #endif
 }
 
-IRAM_ATTR void mdnsLoop(void)
+void mdnsLoop(void)
 {
 #if defined(ARDUINO_ARCH_ESP8266)
     if(mdns_config.enable) {

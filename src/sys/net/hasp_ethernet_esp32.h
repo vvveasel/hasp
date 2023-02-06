@@ -7,7 +7,7 @@
 #include "ArduinoJson.h"
 
 void ethernetSetup();
-IRAM_ATTR void ethernetLoop(void);
+void ethernetLoop(void);
 
 bool ethernetEverySecond();
 bool ethernetEvery5Seconds();

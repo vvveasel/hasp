@@ -187,7 +187,7 @@ static void ota_on_error(ota_error_t error)
     // delay(5000);
 }
 
-IRAM_ATTR void otaLoop(void)
+void otaLoop(void)
 {
     ArduinoOTA.handle();
 }

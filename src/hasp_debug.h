@@ -137,7 +137,7 @@ extern "C" {
 
 // Functions used by ANDROID, WINDOWS and POSSIX
 void debugLvglLogEvent(lv_log_level_t level, const char* file, uint32_t line, const char* funcname, const char* descr);
-IRAM_ATTR void debugLoop(void);
+void debugLoop(void);
 void debugEverySecond(void);
 void debugStart(void);
 void debugStartSerial(void);

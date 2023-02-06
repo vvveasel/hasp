@@ -14,7 +14,7 @@
 /* ===== Default Event Processors ===== */
 void otaSetup(void);
 #if HASP_USE_ARDUINOOTA > 0
-IRAM_ATTR void otaLoop(void);
+void otaLoop(void);
 void otaEverySecond(void);
 #endif // HASP_USE_ARDUINOOTA
 

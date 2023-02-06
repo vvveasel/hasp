@@ -1503,7 +1503,7 @@ void dispatchSetup()
     LOG_INFO(TAG_MSGR, F(D_SERVICE_STARTED));
 }
 
-IRAM_ATTR void dispatchLoop()
+void dispatchLoop()
 {}
 
 #if 1 || ARDUINO

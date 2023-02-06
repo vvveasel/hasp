@@ -76,7 +76,7 @@ void ethernetSetup()
     if(started) LOG_TRACE(TAG_ETH, F("ETHSPI Started "));
 }
 
-IRAM_ATTR void ethernetLoop(void)
+void ethernetLoop(void)
 {}
 
 bool ethernetEvery5Seconds()

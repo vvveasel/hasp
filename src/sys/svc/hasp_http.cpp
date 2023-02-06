@@ -2687,7 +2687,7 @@ void httpSetup()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-IRAM_ATTR void httpLoop(void)
+void httpLoop(void)
 {
 #if(HASP_USE_CAPTIVE_PORTAL > 0) && (HASP_USE_WIFI > 0)
     dnsServer.processNextRequest();

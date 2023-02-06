@@ -24,7 +24,7 @@ struct hasp_http_config_t
 };
 
 void httpSetup();
-IRAM_ATTR void httpLoop(void);
+void httpLoop(void);
 // void httpReconnect(void);
 void httpStart(void);
 void httpStop(void);

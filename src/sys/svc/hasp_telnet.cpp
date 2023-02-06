@@ -340,7 +340,7 @@ void telnetSetup()
 #endif
 }
 
-IRAM_ATTR void telnetLoop()
+void telnetLoop()
 {
     // Basic telnet client handling code from: https://gist.github.com/tablatronix/4793677ca748f5f584c95ec4a2b10303
 

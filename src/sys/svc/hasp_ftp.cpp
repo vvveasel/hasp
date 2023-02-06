@@ -144,7 +144,7 @@ void ftpSetup()
 #endif
 }
 
-IRAM_ATTR void ftpLoop()
+void ftpLoop()
 {
     if(ftpSrv) ftpSrv->handleFTP(); // make sure in loop you call handleFTP()!!
 }

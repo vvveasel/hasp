@@ -8,7 +8,7 @@
 
 /* ===== Default Event Processors ===== */
 void ftpSetup();
-IRAM_ATTR void ftpLoop(void);
+void ftpLoop(void);
 void ftpEvery5Seconds(void);
 void ftpEverySecond(void);
 void ftpStart(void);

@@ -419,7 +419,7 @@ void debugSetup(JsonObject settings)
 #endif
 }
 
-IRAM_ATTR void debugLoop(void)
+void debugLoop(void)
 {}
 
 void printLocalTime()

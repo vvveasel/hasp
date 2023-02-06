@@ -152,7 +152,7 @@ void setup()
     mainLastLoopTime = -1000; // reset loop counter
 }
 
-IRAM_ATTR void loop()
+void loop()
 {
 #if defined(ESP32) && defined(HASP_USE_ESP_MQTT)
     if(!gui_acquire()) {

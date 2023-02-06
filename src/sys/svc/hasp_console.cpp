@@ -141,7 +141,7 @@ void consoleSetup()
 #endif
 }
 
-IRAM_ATTR void consoleLoop()
+void consoleLoop()
 {
     if(!console) return;
 
