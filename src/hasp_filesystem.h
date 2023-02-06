@@ -6,6 +6,7 @@
 
 //#include <Arduino.h>
 //#include <FS.h>
+#include <stdint.h>
 
 bool filesystemSetup(void);
 

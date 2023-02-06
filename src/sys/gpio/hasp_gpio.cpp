@@ -9,7 +9,7 @@
 
 // Device Drivers
 #include "dev/device.h"
-#include "drv/tft/tft_driver.h"
+//#include "drv/tft/tft_driver.h"
 // #include "drv/touch/touch_driver.h"
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -745,10 +745,6 @@ bool gpioInUse(uint8_t pin)
 
 bool gpioIsSystemPin(uint8_t gpio)
 {
-    if(haspTft.is_driver_pin(gpio)) {
-        LOG_DEBUG(TAG_GPIO, F(D_BULLET D_GPIO_PIN " %d => TFT"), gpio);
-        return true;
-    }
     if(haspDevice.is_system_pin(gpio)) {
         LOG_DEBUG(TAG_GPIO, F(D_BULLET D_GPIO_PIN " %d => ESP"), gpio);
         return true;
