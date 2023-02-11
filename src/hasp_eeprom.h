@@ -4,7 +4,7 @@
 #ifndef HASP_EEPROM_H
 #define HASP_EEPROM_H
 
-#include <Arduino.h>
+//#include <Arduino.h>
 
 void eepromSetup(void);
 void eepromLoop(void);

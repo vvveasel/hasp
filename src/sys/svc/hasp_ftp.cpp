@@ -28,10 +28,10 @@ void ftp_callback(FtpOperation ftpOperation, unsigned int freeSpace, unsigned in
 {
     switch(ftpOperation) {
         case FTP_CONNECT:
-            LOG_VERBOSE(TAG_FTP, F(D_SERVICE_CONNECTED));
+            printf(D_SERVICE_CONNECTED);
             break;
         case FTP_DISCONNECT:
-            LOG_VERBOSE(TAG_FTP, F(D_SERVICE_DISCONNECTED));
+            printf(D_SERVICE_DISCONNECTED);
             break;
         case FTP_FREE_SPACE_CHANGE:
             filesystemInfo();
@@ -49,13 +49,13 @@ void ftp_transfer_callback(FtpTransferOperation ftpOperation, const char* name, 
         case FTP_UPLOAD_START: {
             char size[16];
             Parser::format_bytes(transferredSize, size, sizeof(size));
-            LOG_VERBOSE(TAG_FTP, "Receiving file %s (%s)", name, size);
+            printf("Receiving file %s (%s)", name, size);
             return;
         }
         case FTP_DOWNLOAD_START: {
             char size[16];
             Parser::format_bytes(transferredSize, size, sizeof(size));
-            LOG_VERBOSE(TAG_FTP, "Sending file %s (%s)", name, size);
+            printf("Sending file %s (%s)", name, size);
             return;
         }
         case FTP_UPLOAD:
@@ -64,11 +64,11 @@ void ftp_transfer_callback(FtpTransferOperation ftpOperation, const char* name, 
         case FTP_TRANSFER_STOP: {
             char size[16];
             Parser::format_bytes(transferredSize, size, sizeof(size));
-            LOG_VERBOSE(TAG_FTP, "Completed file %s (%s)", name, size);
+            printf("Completed file %s (%s)", name, size);
             break;
         }
         case FTP_TRANSFER_ERROR:
-            LOG_ERROR(TAG_FTP, ("Transfer error!"));
+            printf("Transfer error!");
             break;
         default:
             break;
@@ -100,13 +100,13 @@ void ftpStop(void)
     transferName = NULL;
     ftpInitializePorts();
 
-    LOG_INFO(TAG_FTP, F(D_SERVICE_STOPPED));
+    printf(D_SERVICE_STOPPED);
 }
 
 void ftpStart()
 {
     if(!ftpSrv) {
-        LOG_TRACE(TAG_FTP, F(D_SERVICE_STARTING));
+        printf(D_SERVICE_STARTING);
         Preferences preferences;
 
         nvs_user_begin(preferences, FP_FTP, true);
@@ -115,13 +115,13 @@ void ftpStart()
         preferences.end();
 
         if(!ftpEnabled || ftpUsername == "" || ftpUsername == "anonymous" || ftpCtrlPort == 0) {
-            LOG_INFO(TAG_FTP, F(D_SERVICE_DISABLED));
+            printf(D_SERVICE_DISABLED);
             return;
         }
 
         ftpSrv = new FtpServer(ftpCtrlPort, ftpDataPort);
         if(!ftpSrv) {
-            LOG_INFO(TAG_FTP, F(D_SERVICE_START_FAILED));
+            printf(D_SERVICE_START_FAILED);
             return;
         }
 
@@ -129,10 +129,10 @@ void ftpStart()
         ftpSrv->setTransferCallback(ftp_transfer_callback);
         ftpSrv->begin(ftpUsername.c_str(), ftpPassword.c_str(), D_MANUFACTURER); // Password must be non-empty
 
-        LOG_VERBOSE(TAG_FTP, F(FTP_SERVER_VERSION));
+        printf(FTP_SERVER_VERSION);
     }
 
-    LOG_INFO(TAG_FTP, F(D_SERVICE_STARTED));
+    printf(D_SERVICE_STARTED);
 }
 
 void ftpSetup()
@@ -155,7 +155,7 @@ void ftpEverySecond(void)
 
     char size[16];
     Parser::format_bytes(transferSize, size, sizeof(size));
-    LOG_VERBOSE(TAG_FTP, D_BULLET "%s (%s)", transferName, size);
+    printf(D_BULLET "%s (%s)", transferName, size);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

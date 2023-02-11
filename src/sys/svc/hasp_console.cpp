@@ -51,7 +51,7 @@ static void console_logon()
     consoleLoginState   = CONSOLE_AUTHENTICATED; // User and Pass are correct
     consoleLoginAttempt = 0;                     // Reset attempt counter
 
-    LOG_TRACE(TAG_CONS, F(D_TELNET_CLIENT_LOGIN_FROM), "serial");
+    printf(D_TELNET_CLIENT_LOGIN_FROM, "serial");
 }
 
 static void console_process_line(const char* input)
@@ -75,7 +75,7 @@ static void console_process_line(const char* input)
                 consoleLoginState = CONSOLE_UNAUTHENTICATED;
                 consoleLoginAttempt++; // Subsequent attempt
                 bufferedSerialClient->println(F(D_NETWORK_CONNECTION_UNAUTHORIZED "\r\n"));
-                LOG_WARNING(TAG_CONS, F(D_TELNET_INCORRECT_LOGIN_ATTEMPT), "serial");
+                printf(D_TELNET_INCORRECT_LOGIN_ATTEMPT, "serial");
                 if(consoleLoginAttempt >= 3) {
                     console_timeout();
                 } else {
@@ -104,30 +104,28 @@ static void console_process_line(const char* input)
 
 void consoleStart()
 {
-    LOG_TRACE(TAG_MSGR, F(D_SERVICE_STARTING));
+    printf(D_SERVICE_STARTING);
     console = new ConsoleInput(bufferedSerialClient, HASP_CONSOLE_BUFFER);
     if(console) {
         debugStartSerial(); // open Serial port
 
         /* Now register logger for serial */
-        Log.registerOutput(0, bufferedSerialClient, HASP_LOG_LEVEL, true);
         bufferedSerialClient->flush();
 
-        LOG_INFO(TAG_CONS, F(D_SERVICE_STARTED));
+        printf(D_SERVICE_STARTED);
 
         console->setLineCallback(console_process_line);
         console_logon(); // todo: logon
         console->setPrompt("Prompt > ");
     } else {
         console_logoff();
-        LOG_ERROR(TAG_CONS, F(D_SERVICE_START_FAILED));
+        printf(D_SERVICE_START_FAILED);
     }
 }
 
 void consoleStop()
 {
     console_logoff();
-    Log.unregisterOutput(0); // serialClient
     HASP_SERIAL.end();
 
     delete console;

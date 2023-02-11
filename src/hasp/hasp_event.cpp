@@ -143,7 +143,7 @@ void event_timer_clock(lv_task_t* task)
             lv_mem_free(data); // the object that the user_data points to is gone}
         }
         lv_task_del(task); // the calendar object for this task was deleted
-        LOG_WARNING(TAG_EVENT, "event_timer_clock could not find the linked object");
+        printf("event_timer_clock could not find the linked object");
         return;
 
     } else if(!data->templ) {
@@ -202,7 +202,7 @@ static bool translate_event(lv_obj_t* obj, lv_event_t event, uint8_t& eventid)
             break;
 
         case LV_EVENT_DELETE:
-            LOG_VERBOSE(TAG_EVENT, F(D_OBJECT_DELETED));
+            printf(D_OBJECT_DELETED);
             delete_event_handler(obj, event);
             break;
 
@@ -239,7 +239,7 @@ static void event_send_object_data(lv_obj_t* obj, const char* data)
         if(!data) return;
         object_dispatch_state(pageid, objid, data);
     } else {
-        LOG_ERROR(TAG_MSGR, F(D_OBJECT_UNKNOWN));
+        printf(D_OBJECT_UNKNOWN);
     }
 }
 
@@ -289,54 +289,54 @@ static void log_event(const char* name, lv_event_t event)
 
     switch(event) {
         case LV_EVENT_PRESSED:
-            LOG_TRACE(TAG_EVENT, "%s Changed", name);
+            printf("%s Changed", name);
             break;
 
         case LV_EVENT_PRESS_LOST:
-            LOG_TRACE(TAG_EVENT, "%s Press lost", name);
+            printf("%s Press lost", name);
             break;
 
         case LV_EVENT_SHORT_CLICKED:
-            LOG_TRACE(TAG_EVENT, "%s Short clicked", name);
+            printf("%s Short clicked", name);
             break;
 
         case LV_EVENT_CLICKED:
-            LOG_TRACE(TAG_EVENT, "%s Clicked", name);
+            printf("%s Clicked", name);
             break;
 
         case LV_EVENT_LONG_PRESSED:
-            LOG_TRACE(TAG_EVENT, "%S Long press", name);
+            printf("%S Long press", name);
             break;
 
         case LV_EVENT_LONG_PRESSED_REPEAT:
-            LOG_TRACE(TAG_EVENT, "%s Long press repeat", name);
+            printf("%s Long press repeat", name);
             break;
 
         case LV_EVENT_RELEASED:
-            LOG_TRACE(TAG_EVENT, "%s Released", name);
+            printf("%s Released", name);
             break;
 
         case LV_EVENT_VALUE_CHANGED:
-            LOG_TRACE(TAG_EVENT, "%s Changed", name);
+            printf("%s Changed", name);
             break;
 
         case LV_EVENT_GESTURE:
-            LOG_TRACE(TAG_EVENT, "%s Gesture", name);
+            printf("%s Gesture", name);
             break;
 
         case LV_EVENT_FOCUSED:
-            LOG_TRACE(TAG_EVENT, "%s Focussed", name);
+            printf("%s Focussed", name);
             break;
 
         case LV_EVENT_DEFOCUSED:
-            LOG_TRACE(TAG_EVENT, "%s Defocussed", name);
+            printf("%s Defocussed", name);
             break;
 
         case LV_EVENT_PRESSING:
             break;
 
         default:
-            LOG_TRACE(TAG_EVENT, "%s Other %d", name, event);
+            printf("%s Other %d", name, event);
     }
 }
 
@@ -400,7 +400,7 @@ void textarea_event_handler(lv_obj_t* obj, lv_event_t event)
     log_event("textarea", event);
 
     if(event == LV_EVENT_VALUE_CHANGED) {
-        LOG_TRACE(TAG_EVENT, "Changed to: %s", lv_textarea_get_text(obj));
+        printf("Changed to: %s", lv_textarea_get_text(obj));
 
         uint8_t hasp_event_id;
         if(!translate_event(obj, event, hasp_event_id)) return;
@@ -475,7 +475,7 @@ void generic_event_handler(lv_obj_t* obj, lv_event_t event)
             break;
 
         case LV_EVENT_DELETE:
-            LOG_VERBOSE(TAG_EVENT, F(D_OBJECT_DELETED));
+            printf(D_OBJECT_DELETED);
             delete_event_handler(obj, event); // free and destroy persistent memory allocated for certain objects
             return;
 
@@ -486,7 +486,7 @@ void generic_event_handler(lv_obj_t* obj, lv_event_t event)
 
         case LV_EVENT_VALUE_CHANGED: // Should not occur in this event handler
         default:
-            LOG_WARNING(TAG_EVENT, F(D_OBJECT_EVENT_UNKNOWN), event);
+            printf(D_OBJECT_EVENT_UNKNOWN, event);
             return;
     }
 
@@ -509,7 +509,7 @@ void generic_event_handler(lv_obj_t* obj, lv_event_t event)
                 JsonVariant json  = doc[eventname].as<JsonVariant>();
                 uint8_t savedPage = haspPages.get();
                 if(!dispatch_json_variant(json, savedPage, TAG_EVENT)) {
-                    LOG_WARNING(TAG_MSGR, F(D_DISPATCH_COMMAND_NOT_FOUND), eventname);
+                    printf(D_DISPATCH_COMMAND_NOT_FOUND, eventname);
                     // dispatch_simple_text_command(payload, source);
                 }
             }

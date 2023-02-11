@@ -78,7 +78,7 @@ void hasp_object_tree(const lv_obj_t* parent, uint8_t pageid, uint16_t level)
     if(level < 15) indent[level * 2] = 0;
     indent[30] = 0;
 
-    LOG_VERBOSE(TAG_HASP, F("%s- " HASP_OBJECT_NOTATION ": %s"), indent, pageid, parent->user_data.id,
+    printf("%s- " HASP_OBJECT_NOTATION ": %s", indent, pageid, parent->user_data.id,
                 obj_get_type_name(parent));
 
     lv_obj_t* child;
@@ -97,7 +97,7 @@ void hasp_object_tree(const lv_obj_t* parent, uint8_t pageid, uint16_t level)
         uint16_t tabcount = lv_tabview_get_tab_count(parent);
         for(uint16_t i = 0; i < tabcount; i++) {
             lv_obj_t* tab = lv_tabview_get_tab(parent, i);
-            LOG_VERBOSE(TAG_HASP, "Found tab %i", i);
+            printf("Found tab %i", i);
             if(tab->user_data.objid) hasp_object_tree(tab, pageid, level + 1);
         }
 #endif
@@ -168,7 +168,7 @@ void hasp_process_attribute(uint8_t pageid, uint8_t objid, const char* attr, con
     if(lv_obj_t* obj = hasp_find_obj_from_page_id(pageid, objid)) {
         hasp_process_obj_attribute(obj, attr, payload, update); // || strlen(payload) > 0);
     } else {
-        LOG_WARNING(TAG_HASP, F(D_OBJECT_UNKNOWN " " HASP_OBJECT_NOTATION), pageid, objid);
+        printf(D_OBJECT_UNKNOWN " " HASP_OBJECT_NOTATION, pageid, objid);
     }
 }
 
@@ -240,7 +240,7 @@ void hasp_new_object(const JsonObject& config, uint8_t& saved_page_id)
     /* Page with pageid is the default parent_obj */
     lv_obj_t* parent_obj = haspPages.get_obj(pageid);
     if(!parent_obj) {
-        LOG_WARNING(TAG_HASP, F(D_OBJECT_PAGE_UNKNOWN), pageid);
+        printf(D_OBJECT_PAGE_UNKNOWN, pageid);
         return;
     } else {
         saved_page_id = pageid; /* save the current pageid for next objects */
@@ -251,10 +251,10 @@ void hasp_new_object(const JsonObject& config, uint8_t& saved_page_id)
         uint8_t parentid = config[FPSTR(FP_PARENTID)].as<uint8_t>();
         parent_obj       = hasp_find_obj_from_parent_id(parent_obj, parentid);
         if(!parent_obj) {
-            LOG_WARNING(TAG_HASP, F("Parent ID " HASP_OBJECT_NOTATION " not found, skipping..."), pageid, parentid);
+            printf("Parent ID " HASP_OBJECT_NOTATION " not found, skipping...", pageid, parentid);
             return;
         } else {
-            LOG_VERBOSE(TAG_HASP, F("Parent ID " HASP_OBJECT_NOTATION " found"), pageid, parentid);
+            printf("Parent ID " HASP_OBJECT_NOTATION " found", pageid, parentid);
         }
         config.remove(FPSTR(FP_PARENTID));
     }
@@ -278,7 +278,7 @@ void hasp_new_object(const JsonObject& config, uint8_t& saved_page_id)
                 config.remove(FPSTR(FP_OBJ));
             }
         } else {
-            LOG_WARNING(TAG_HASP, F(D_ATTRIBUTE_OBSOLETE D_ATTRIBUTE_INSTEAD), "objid",
+            printf(D_ATTRIBUTE_OBSOLETE D_ATTRIBUTE_INSTEAD, "objid",
                         "obj"); // TODO: obsolete objid
             sdbm = config[FPSTR(FP_OBJID)].as<uint8_t>();
             config.remove(FPSTR(FP_OBJID));
@@ -490,7 +490,7 @@ void hasp_new_object(const JsonObject& config, uint8_t& saved_page_id)
                         obj->user_data.objid = LV_HASP_TAB;
                     }
                 } else {
-                    LOG_WARNING(TAG_HASP, F("Parent of a tab must be a tabview object"));
+                    printf("Parent of a tab must be a tabview object");
                     return;
                 }
                 break;
@@ -688,7 +688,7 @@ void hasp_new_object(const JsonObject& config, uint8_t& saved_page_id)
 
         /* No object was actually created */
         if(!obj) {
-            LOG_ERROR(TAG_HASP, F(D_OBJECT_CREATE_FAILED), id);
+            printf(D_OBJECT_CREATE_FAILED, id);
             return;
         }
 
@@ -711,7 +711,7 @@ void hasp_new_object(const JsonObject& config, uint8_t& saved_page_id)
 #endif
 
         /** verbose reporting **/
-        LOG_VERBOSE(TAG_HASP, F(D_BULLET HASP_OBJECT_NOTATION " = %s"), pageid, id, obj_get_type_name(obj));
+        printf(D_BULLET HASP_OBJECT_NOTATION " = %s", pageid, id, obj_get_type_name(obj));
 
 #ifdef HASP_DEBUG
         /* test double-check */

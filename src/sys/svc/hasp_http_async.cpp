@@ -3,7 +3,7 @@
 
 //#include "webServer.h"
 #include "hasplib.h"
-#include "ArduinoLog.h"
+//#include "ArduinoLog.h"
 
 #if defined(ARDUINO_ARCH_ESP32)
 #include "Update.h"

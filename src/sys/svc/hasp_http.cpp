@@ -2,7 +2,7 @@
    For full license information read the LICENSE file in the project folder */
 
 #include "hasplib.h"
-#include "ArduinoLog.h"
+//#include "ArduinoLog.h"
 
 #define HTTP_LEGACY
 
@@ -191,7 +191,7 @@ bool http_is_authenticated()
     if(http_config.password[0] != '\0') { // Request HTTP auth if httpPassword is set
         if(!webServer.authenticate(http_config.username, http_config.password)) {
             webServer.requestAuthentication();
-            LOG_WARNING(TAG_HTTP, F(D_TELNET_INCORRECT_LOGIN_ATTEMPT),
+            printf(D_TELNET_INCORRECT_LOGIN_ATTEMPT,
                         webServer.client().remoteIP().toString().c_str());
             return false;
         }
@@ -205,7 +205,7 @@ bool http_is_authenticated(const __FlashStringHelper* notused)
     if(!http_is_authenticated()) return false;
 
 #if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
-    LOG_VERBOSE(TAG_HTTP, F(D_HTTP_SENDING_PAGE), webServer.uri().c_str(),
+    printf(D_HTTP_SENDING_PAGE, webServer.uri().c_str(),
                 webServer.client().remoteIP().toString().c_str());
 #else
         // LOG_INFO(TAG_HTTP,F(D_HTTP_SENDING_PAGE), page,
@@ -279,7 +279,7 @@ static void webSendHtmlHeader(const char* nodename, uint32_t httpdatalength, uin
         contentLength += sizeof(HTTP_END) - 1;
 
         if(httpdatalength > HTTP_PAGE_SIZE) {
-            LOG_WARNING(TAG_HTTP, F("Sending page with %u static and %u dynamic bytes"), contentLength, httpdatalength);
+            printf("Sending page with %u static and %u dynamic bytes", contentLength, httpdatalength);
         }
 
         webServer.setContentLength(contentLength + httpdatalength);
@@ -462,7 +462,7 @@ static void webHandleScreenshot()
         if(webServer.hasHeader("If-None-Match")) {
             etag = webServer.header("If-None-Match");
             etag.replace("\"", "");
-            LOG_DEBUG(TAG_HTTP, F("If-None-Match: %s"), etag.c_str());
+            printf("If-None-Match: %s", etag.c_str());
             if(modified > 0 && modified == atol(etag.c_str())) { // Not Changed
                 http_send_etag(etag);                            // Reuse same ETag
                 webServer.send_P(304, PSTR("image/bmp"), "");    // Use correct mimetype
@@ -685,25 +685,25 @@ static void webHandleApi()
 #endif
         configOutput(settings, TAG_HTTP); // Log current JSON config
 
-        LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+        printf("%s - %d", __FILE__, __LINE__);
         // Mask non-blank passwords
         // if(!settings[FPSTR(FP_CONFIG_PASS)].isNull() && settings[FPSTR(FP_CONFIG_PASS)].as<String>().length() != 0) {
         //     settings[FPSTR(FP_CONFIG_PASS)] = D_PASSWORD_MASK;
         // }
 
-        LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+        printf("%s - %d", __FILE__, __LINE__);
         doc.shrinkToFit();
-        LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+        printf("%s - %d", __FILE__, __LINE__);
         const size_t size = measureJson(doc) + 1;
-        LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+        printf("%s - %d", __FILE__, __LINE__);
         char jsondata[size];
-        LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+        printf("%s - %d", __FILE__, __LINE__);
         memset(jsondata, 0, size);
-        LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+        printf("%s - %d", __FILE__, __LINE__);
         serializeJson(doc, jsondata, size);
-        LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+        printf("%s - %d", __FILE__, __LINE__);
         webServer.send(200, contentType, jsondata);
-        LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+        printf("%s - %d", __FILE__, __LINE__);
 
     } else {
         webServer.send(400, contentType, "Bad Request");
@@ -781,7 +781,7 @@ static void webHandleApiConfig()
         } else
 #endif
         {
-            LOG_WARNING(TAG_HTTP, F("Invalid module %s"), endpoint_key);
+            printf("Invalid module %s", endpoint_key);
             return;
         }
     }
@@ -827,25 +827,25 @@ static void webHandleApiConfig()
     }
     configOutput(settings, TAG_HTTP); // Log current JSON config
 
-    LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+    printf("%s - %d", __FILE__, __LINE__);
     // Mask non-blank passwords
     if(!settings[FPSTR(FP_CONFIG_PASS)].isNull() && settings[FPSTR(FP_CONFIG_PASS)].as<String>().length() != 0) {
         settings[FPSTR(FP_CONFIG_PASS)] = D_PASSWORD_MASK;
     }
 
-    LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+    printf("%s - %d", __FILE__, __LINE__);
     // doc.shrinkToFit();
-    LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+    printf("%s - %d", __FILE__, __LINE__);
     const size_t size = measureJson(doc) + 1;
-    LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+    printf("%s - %d", __FILE__, __LINE__);
     char jsondata[size];
-    LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+    printf("%s - %d", __FILE__, __LINE__);
     memset(jsondata, 0, size);
-    LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+    printf("%s - %d", __FILE__, __LINE__);
     serializeJson(doc, jsondata, size);
-    LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+    printf("%s - %d", __FILE__, __LINE__);
     webServer.send(200, contentType, jsondata);
-    LOG_DEBUG(TAG_HTTP, "%s - %d", __FILE__, __LINE__);
+    printf("%s - %d", __FILE__, __LINE__);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -922,7 +922,7 @@ static void http_upload_progress()
 {
     long t = webServer.header("Content-Length").toInt();
     if(millis() - htppLastLoopTime >= 1250) {
-        LOG_VERBOSE(TAG_HTTP, F(D_BULLET "Uploaded %u / %d bytes"), upload->totalSize + upload->currentSize, t);
+        printf(D_BULLET "Uploaded %u / %d bytes", upload->totalSize + upload->currentSize, t);
         htppLastLoopTime = millis();
     }
     if(t > 0) t = (upload->totalSize + upload->currentSize) * 100 / t;
@@ -940,7 +940,7 @@ static inline void webUpdatePrintError()
     LOG_ERROR(TAG_HTTP, output.c_str());
     haspProgressMsg(output.c_str());
 #elif defined(ARDUINO_ARCH_ESP32)
-    LOG_ERROR(TAG_HTTP, Update.errorString()); // ESP32 has errorString()
+    printf(Update.errorString()); // ESP32 has errorString()
     haspProgressMsg(Update.errorString());
     Update.abort();
     Update.end(false);
@@ -949,7 +949,7 @@ static inline void webUpdatePrintError()
 
 static void webUpdateReboot()
 {
-    LOG_INFO(TAG_HTTP, F("Update Success: %u bytes received. Rebooting..."), upload->totalSize);
+    printf("Update Success: %u bytes received. Rebooting...", upload->totalSize);
 
     { // Send Content
         String httpMessage((char*)0);
@@ -980,11 +980,11 @@ static void webHandleFirmwareUpload()
             int command = webServer.arg(F("cmd")).toInt();
             size_t size = 0;
             if(command == U_FLASH) {
-                LOG_TRACE(TAG_HTTP, F("Update flash: %s"), upload->filename.c_str());
+                printf("Update flash: %s", upload->filename.c_str());
                 size = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
 #ifdef ESP32
             } else if(command == U_SPIFFS) {
-                LOG_TRACE(TAG_HTTP, F("Update filesystem: %s"), upload->filename.c_str());
+                printf("Update filesystem: %s", upload->filename.c_str());
                 size = UPDATE_SIZE_UNKNOWN;
 #endif
             }
@@ -1046,7 +1046,7 @@ static inline int handleFilesystemFile(String path)
         // if(!HASP_FS.exists(path) && HASP_FS.exists(pathWithBr))
         //     path = pathWithBr; // Only use .gz if normal file doesn't exist
 
-        LOG_TRACE(TAG_HTTP, F(D_HTTP_SENDING_PAGE), path.c_str(), webServer.client().remoteIP().toString().c_str());
+        printf(D_HTTP_SENDING_PAGE, path.c_str(), webServer.client().remoteIP().toString().c_str());
 
         String configFile((char*)0); // Verify if the file is config.json
         configFile = FPSTR(FP_HASP_CONFIG_FILE);
@@ -1072,7 +1072,7 @@ static inline int handleFilesystemFile(String path)
             if(webServer.hasHeader("If-None-Match")) {
                 etag = webServer.header("If-None-Match");
                 etag.replace("\"", "");
-                LOG_DEBUG(TAG_HTTP, F("If-None-Match: %s"), etag.c_str());
+                printf("If-None-Match: %s", etag.c_str());
                 if(modified > 0 && modified == atol(etag.c_str())) { // Not Changed
                     file.close();                                    // Skip reading the file contents
                     http_send_etag(etag);                            // Reuse same ETag
@@ -1094,7 +1094,7 @@ static inline int handleFilesystemFile(String path)
             // } else {
             // Stream other files directly from filesystem
             webServer.streamFile(file, contentType);
-            LOG_DEBUG(TAG_HTTP, F("If-None-Match: %s"), etag.c_str());
+            printf("If-None-Match: %s", etag.c_str());
             //}
             file.close();
         }
@@ -1129,16 +1129,16 @@ static void handleFileUpload()
             fsUploadFile = HASP_FS.open(filename, "w");
             if(fsUploadFile) {
                 if(!fsUploadFile || fsUploadFile.isDirectory()) {
-                    LOG_WARNING(TAG_HTTP, F(D_FILE_SAVE_FAILED), filename.c_str());
+                    printf(D_FILE_SAVE_FAILED, filename.c_str());
                     webServer.send_P(400, PSTR("text/plain"), PSTR("Invalid filename"));
                     fsUploadFile.close();
                     fsUploadFile = File();
                 } else {
-                    LOG_TRACE(TAG_HTTP, F("handleFileUpload Name: %s"), filename.c_str());
+                    printf("handleFileUpload Name: %s", filename.c_str());
                     haspProgressMsg(fsUploadFile.name());
                 }
             } else {
-                LOG_ERROR(TAG_HTTP, F("Could not open file %s for writing"), filename.c_str());
+                printf("Could not open file %s for writing", filename.c_str());
                 webServer.send_P(400, PSTR("text/plain"), PSTR("Could not open file for writing"));
             }
             break;
@@ -1146,7 +1146,7 @@ static void handleFileUpload()
         case UPLOAD_FILE_WRITE: {
             if(fsUploadFile) {
                 if(fsUploadFile.write(upload->buf, upload->currentSize) != upload->currentSize) {
-                    LOG_ERROR(TAG_HTTP, F("Failed to write received data to file"));
+                    printf("Failed to write received data to file");
                     webServer.send_P(400, PSTR("text/plain"), PSTR("Failed to write received data to file"));
                     fsUploadFile.close();
                     fsUploadFile = File();
@@ -1158,7 +1158,7 @@ static void handleFileUpload()
         }
         case UPLOAD_FILE_END: {
             if(fsUploadFile) {
-                LOG_INFO(TAG_HTTP, F("Uploaded %s (%u bytes)"), fsUploadFile.name(), upload->totalSize);
+                printf("Uploaded %s (%u bytes)", fsUploadFile.name(), upload->totalSize);
                 fsUploadFile.close();
 
                 // Redirect to /config/hasp page. This flushes the web buffer and frees the memory
@@ -1169,7 +1169,7 @@ static void handleFileUpload()
             break;
         }
         default:
-            LOG_WARNING(TAG_HTTP, F("File upload aborted"));
+            printf("File upload aborted");
             webServer.send_P(400, PSTR("text/plain"), PSTR("File upload aborted"));
             fsUploadFile.close();
             fsUploadFile = File();
@@ -1187,7 +1187,7 @@ static void handleFileDelete()
         return webServer.send_P(500, mimetype, PSTR("BAD ARGS"));
     }
     String path = webServer.arg(0);
-    LOG_TRACE(TAG_HTTP, F("handleFileDelete: %s"), path.c_str());
+    printf("handleFileDelete: %s", path.c_str());
     if(path == "/") {
         return webServer.send_P(500, mimetype, PSTR("BAD PATH"));
     }
@@ -1208,7 +1208,7 @@ static void handleFileCreate()
 
     if(webServer.hasArg(F("path"))) {
         String path = webServer.arg(F("path"));
-        LOG_TRACE(TAG_HTTP, F("handleFileCreate: %s"), path.c_str());
+        printf("handleFileCreate: %s", path.c_str());
         if(path == "/") {
             return webServer.send(500, PSTR("text/plain"), PSTR("BAD PATH"));
         }
@@ -1496,7 +1496,7 @@ static void webHandleGuiConfig()
                 snprintf_P(buffer, sizeof(buffer), PSTR("GPIO %d"), gpio);
                 httpMessage += getOption(gpio, buffer);
             } else {
-                LOG_WARNING(TAG_HTTP, F("pin %d"), gpio);
+                printf("pin %d", gpio);
             }
         }
 #else
@@ -2320,7 +2320,7 @@ static void httpHandleFile(String path)
     }
 
 #if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
-    LOG_TRACE(TAG_HTTP, F("Sending %d %s to client connected from: %s"), statuscode, path.c_str(),
+    printf("Sending %d %s to client connected from: %s", statuscode, path.c_str(),
               webServer.client().remoteIP().toString().c_str());
 #else
     // LOG_TRACE(TAG_HTTP,F("Sending 404 to client connected from: %s"),
@@ -2491,7 +2491,7 @@ void httpStart()
     ip = WiFi.localIP();
     LOG_INFO(TAG_HTTP, F(D_SERVICE_STARTED " @ http://%d.%d.%d.%d"), ip[0], ip[1], ip[2], ip[3]);
 #else
-    LOG_INFO(TAG_HTTP, F(D_SERVICE_STARTED " @ http://%s"),
+    printf(D_SERVICE_STARTED " @ http://%s",
              (WiFi.getMode() != WIFI_STA ? WiFi.softAPIP().toString().c_str() : WiFi.localIP().toString().c_str()));
 #endif
 #endif
@@ -2514,7 +2514,7 @@ void httpStop()
 {
     webServer.stop();
     webServerStarted = false;
-    LOG_WARNING(TAG_HTTP, F(D_SERVICE_STOPPED));
+    printf(D_SERVICE_STOPPED);
 }
 
 // Do not keep CSS in memory because it is cached in the browser
@@ -2572,7 +2572,7 @@ static inline void webStartConfigPortal()
 #if HASP_USE_WIFI > 0
     webServer.onNotFound(webHandleWifiConfig);
 #endif
-    LOG_TRACE(TAG_HTTP, F("Wifi access point"));
+    printf("Wifi access point");
 }
 
 void httpSetup()
@@ -2581,7 +2581,7 @@ void httpSetup()
     nvs_user_begin(preferences, FP_HTTP, true);
     String password = preferences.getString(FP_CONFIG_PASS, HTTP_PASSWORD);
     strncpy(http_config.password, password.c_str(), sizeof(http_config.password));
-    LOG_DEBUG(TAG_HTTP, F(D_BULLET "Read %s => %s (%d bytes)"), FP_CONFIG_PASS, password.c_str(), password.length());
+    printf(D_BULLET "Read %s => %s (%d bytes)", FP_CONFIG_PASS, password.c_str(), password.length());
 
     // ask server to track these headers
     const char* headerkeys[] = {"Content-Length", "If-None-Match"}; // "Authentication" is automatically checked
@@ -2603,7 +2603,7 @@ void httpSetup()
         F("/update"), HTTP_POST,
         []() {
             webServer.send(200, "text/plain", "");
-            LOG_VERBOSE(TAG_HTTP, F("Total size: %s"), webServer.hostHeader().c_str());
+            printf("Total size: %s", webServer.hostHeader().c_str());
         },
         webHandleFirmwareUpload);
 #endif
@@ -2645,7 +2645,7 @@ void httpSetup()
         F("/edit"), HTTP_POST,
         []() {
             webServer.send(200, "text/plain", "");
-            LOG_VERBOSE(TAG_HTTP, F("Headers: %d"), webServer.headers());
+            printf("Headers: %d", webServer.headers());
         },
         handleFileUpload);
 #endif
@@ -2682,7 +2682,7 @@ void httpSetup()
 #endif // HASP_USE_CONFIG
     webServer.onNotFound(httpHandleFileUri);
 
-    LOG_INFO(TAG_HTTP, F(D_SERVICE_STARTED));
+    printf(D_SERVICE_STARTED);
     // webStart();  Wait for network connection
 }
 

@@ -55,7 +55,7 @@ void my_obj_set_template(lv_obj_t* obj, const char* text)
     if(data->templ)
         strncpy(data->templ, text, size);
     else
-        LOG_WARNING(TAG_ATTR, "Failed to allocate memory!");
+        printf("Failed to allocate memory!");
 }
 
 // the tag data is stored as SERIALIZED JSON data
@@ -84,7 +84,7 @@ void my_obj_set_tag(lv_obj_t* obj, const char* tag)
         if(char* str = (char*)hasp_malloc(size)) {
             len                = serializeJson(doc, str, size); // tidy-up the json object
             obj->user_data.tag = (void*)str;
-            LOG_VERBOSE(TAG_ATTR, "new json: %s", str);
+            printf("new json: %s", str);
         }
     }
 }
@@ -120,7 +120,7 @@ void my_obj_set_action(lv_obj_t* obj, const char* action)
         if(char* str = (char*)hasp_malloc(size)) {
             size_t len            = serializeJson(doc, str, size); // tidy-up the json object
             obj->user_data.action = str;
-            LOG_VERBOSE(TAG_ATTR, "new json: %s", str);
+            printf("new json: %s", str);
         }
     }
 }
@@ -293,10 +293,10 @@ lv_obj_t* FindButtonLabel(lv_obj_t* btn)
             }
 
         } else {
-            LOG_ERROR(TAG_ATTR, F("FindButtonLabel NULL Pointer encountered"));
+            printf("FindButtonLabel NULL Pointer encountered");
         }
     } else {
-        LOG_WARNING(TAG_ATTR, F("Button not defined"));
+        printf("Button not defined");
     }
     return NULL;
 }
@@ -401,7 +401,7 @@ void my_msgbox_set_text(lv_obj_t* mbox, const char* txt)
 static const char* my_btn_get_text(const lv_obj_t* obj)
 {
     if(!obj) {
-        LOG_WARNING(TAG_ATTR, F("Button not defined"));
+        printf("Button not defined");
         return NULL;
     }
 
@@ -421,7 +421,7 @@ static const char* my_btn_get_text(const lv_obj_t* obj)
 #endif
 
     } else {
-        LOG_WARNING(TAG_ATTR, F("my_btn_get_text NULL Pointer encountered"));
+        printf("my_btn_get_text NULL Pointer encountered");
     }
 
     return NULL;
@@ -488,7 +488,7 @@ void my_obj_set_value_str_text(lv_obj_t* obj, uint8_t part, lv_state_t state, co
 
     // Only free if there is no value_str state inheritance
     if(prev_value_str_p != curr_value_str_p && curr_value_str_p != NULL) {
-        LOG_DEBUG(TAG_ATTR, "Releasing %s", curr_value_str_p);
+        printf("Releasing %s", curr_value_str_p);
         lv_mem_free(curr_value_str_p);
     }
 
@@ -560,13 +560,16 @@ const char* my_tabview_get_text(const lv_obj_t* obj)
 void my_tab_set_text(lv_obj_t* obj, const char* payload)
 {
     lv_obj_t* content = lv_obj_get_parent(obj->parent); // 2 levels up
-    if(!content) return LOG_WARNING(TAG_ATTR, F("content not found"));
+    if(!content) printf("content not found");
+    return;
 
     lv_obj_t* tabview = lv_obj_get_parent(content); // 3rd level up
-    if(!tabview) return LOG_WARNING(TAG_ATTR, F("Tabview not found"));
+    if(!tabview) printf("Tabview not found");
+    return;
 
     if(!obj_check_type(tabview, LV_HASP_TABVIEW))
-        return LOG_WARNING(TAG_ATTR, F("LV_HASP_TABVIEW not found %d"), obj_get_type(tabview));
+        printf("LV_HASP_TABVIEW not found %d", obj_get_type(tabview));
+        return;
 
     for(uint16_t id = 0; id < lv_tabview_get_tab_count(tabview); id++) {
         if(obj == lv_tabview_get_tab(tabview, id)) {
@@ -574,25 +577,25 @@ void my_tab_set_text(lv_obj_t* obj, const char* payload)
             return;
         }
     }
-    LOG_WARNING(TAG_ATTR, F("Tab not found"));
+    printf("Tab not found");
 }
 
 const char* my_tab_get_text(const lv_obj_t* obj)
 {
     lv_obj_t* content = lv_obj_get_parent(obj->parent); // 2 levels up
     if(!content) {
-        LOG_WARNING(TAG_ATTR, F("content not found"));
+        printf("content not found");
         return NULL;
     }
 
     lv_obj_t* tabview = lv_obj_get_parent(content); // 3rd level up
     if(!tabview) {
-        LOG_WARNING(TAG_ATTR, F("Tabview not found"));
+        printf("Tabview not found");
         return NULL;
     }
 
     if(!obj_check_type(tabview, LV_HASP_TABVIEW)) {
-        LOG_WARNING(TAG_ATTR, F("LV_HASP_TABVIEW not found %d"), obj_get_type(tabview));
+        printf("LV_HASP_TABVIEW not found %d", obj_get_type(tabview));
         return NULL;
     }
 
@@ -601,7 +604,7 @@ const char* my_tab_get_text(const lv_obj_t* obj)
             return my_tabview_get_tab_name(tabview, id);
         }
     }
-    LOG_WARNING(TAG_ATTR, F("Tab not found"));
+    printf("Tab not found");
     return NULL;
 }
 

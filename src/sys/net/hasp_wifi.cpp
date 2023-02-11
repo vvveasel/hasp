@@ -1,9 +1,9 @@
 /* MIT License - Copyright (c) 2019-2023 Francis Van Roie
    For full license information read the LICENSE file in the project folder */
 
-#include <Arduino.h>
+//#include <Arduino.h>
 #include "ArduinoJson.h"
-#include "ArduinoLog.h"
+//#include "ArduinoLog.h"
 
 #include "hasp_conf.h"
 
@@ -61,11 +61,11 @@ static void wifiConnected(IPAddress ipaddress)
 #endif
 
     if((uint32_t)ipaddress == 0) {
-        LOG_ERROR(TAG_WIFI, F(D_NETWORK_IP_ADDRESS_RECEIVED), wifiIpAddress);
+        printf(D_NETWORK_IP_ADDRESS_RECEIVED, wifiIpAddress);
         network_disconnected();
         return;
     } else {
-        LOG_TRACE(TAG_WIFI, F(D_NETWORK_IP_ADDRESS_RECEIVED), wifiIpAddress);
+        printf(D_NETWORK_IP_ADDRESS_RECEIVED, wifiIpAddress);
     }
 
     network_connected();
@@ -268,13 +268,13 @@ static void wifiDisconnected(const char* ssid, uint8_t reason)
             snprintf_P(buffer, sizeof(buffer), PSTR(D_ERROR_UNKNOWN " (%d)"), reason);
     }
 
-    LOG_WARNING(TAG_WIFI, buffer);
+    printf(buffer);
     network_disconnected();
 }
 
 static void wifiSsidConnected(const char* ssid)
 {
-    LOG_TRACE(TAG_WIFI, F(D_WIFI_CONNECTED_TO), ssid);
+    printf(D_WIFI_CONNECTED_TO, ssid);
 }
 
 #if defined(ARDUINO_ARCH_ESP32)
@@ -282,10 +282,10 @@ static void wifi_callback(WiFiEvent_t event, WiFiEventInfo_t info)
 {
     switch(event) {
         case SYSTEM_EVENT_WIFI_READY: /*!< ESP32 WiFi ready */
-            LOG_VERBOSE(TAG_WIFI, F("ready"));
+            printf("ready");
             break;
         case SYSTEM_EVENT_STA_START: /*!< ESP32 station start */
-            LOG_VERBOSE(TAG_WIFI, F("station start"));
+            printf("station start");
             break;
         case SYSTEM_EVENT_STA_AUTHMODE_CHANGE:    /*!< the auth mode of AP connected by ESP32 station changed */
         case SYSTEM_EVENT_STA_WPS_ER_SUCCESS:     /*!< ESP32 station wps succeeds in enrollee mode */
@@ -310,7 +310,7 @@ static void wifi_callback(WiFiEvent_t event, WiFiEventInfo_t info)
         case SYSTEM_EVENT_ETH_GOT_IP:       /*!< ESP32 ethernet got IP from connected AP */
         case SYSTEM_EVENT_ETH_LOST_IP:      /*!< ESP32 ethernet lost IP and the IP is reset to 0 */
         case SYSTEM_EVENT_MAX:              /*!< Number of members in this enum */
-            LOG_DEBUG(TAG_WIFI, F("Other Event: %d"), event);
+            printf("Other Event: %d", event);
             break;
 
         case SYSTEM_EVENT_STA_CONNECTED: /*!< ESP32 station connected to AP */
@@ -322,7 +322,7 @@ static void wifi_callback(WiFiEvent_t event, WiFiEventInfo_t info)
             break;
 
         case SYSTEM_EVENT_STA_BSS_RSSI_LOW:
-            LOG_WARNING(TAG_WIFI, F("BSS rssi goes below threshold"));
+            printf("BSS rssi goes below threshold");
             break;
 
         case SYSTEM_EVENT_AP_STOP:          /*!< ESP32 soft-AP stop */
@@ -410,8 +410,8 @@ bool wifiShowAP(char* ssid, char* pass)
     // dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
     // dnsServer.start(DNS_PORT, "*", apIP);
 
-    LOG_WARNING(TAG_WIFI, F("Temporary Access Point %s password: %s"), ssid, pass);
-    LOG_WARNING(TAG_WIFI, F("AP IP address : %s"), WiFi.softAPIP().toString().c_str());
+    printf("Temporary Access Point %s password: %s", ssid, pass);
+    printf("AP IP address : %s", WiFi.softAPIP().toString().c_str());
     networkStart();
 // httpReconnect();}
 #endif
@@ -505,13 +505,13 @@ void wifiSetup()
         nvs_user_begin(preferences,"wifi", true);
         String password = preferences.getString(FP_CONFIG_PASS, WIFI_PASSWORD);
         strncpy(wifiPassword, password.c_str(), sizeof(wifiPassword));
-        LOG_DEBUG(TAG_WIFI, F(D_BULLET "Read %s => %s (%d bytes)"), FP_CONFIG_PASS, password.c_str(),
+        printf(D_BULLET "Read %s => %s (%d bytes)", FP_CONFIG_PASS, password.c_str(),
                   password.length());
 #endif
 
         wifiReconnect();
         WiFi.setAutoReconnect(false); // done in wifiEvery5Seconds
-        LOG_TRACE(TAG_WIFI, F(D_WIFI_CONNECTING_TO), wifiSsid);
+        printf(D_WIFI_CONNECTING_TO, wifiSsid);
     }
 #endif
 }
@@ -524,7 +524,7 @@ bool wifiEvery5Seconds()
     }
 #else
     if(WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
-        LOG_DEBUG(TAG_WIFI, F("5sec mode AP %d"), WiFi.getMode());
+        printf("5sec mode AP %d", WiFi.getMode());
         return false;
     }
 #endif
@@ -534,7 +534,7 @@ bool wifiEvery5Seconds()
     }
 
     if(wifiEnabled) {
-        LOG_WARNING(TAG_WIFI, F("No Connection... retry %d"), network_reconnect_counter);
+        printf("No Connection... retry %d", network_reconnect_counter);
         wifiReconnect();
     }
 
@@ -562,18 +562,18 @@ bool wifiValidateSsid(const char* ssid, const char* pass)
     while(attempt < 30 && (WiFi.status() != WL_CONNECTED || WiFi.localIP().toString() == F("0.0.0.0"))) {
 #endif
         attempt++;
-        LOG_INFO(TAG_WIFI, F(D_WIFI_CONNECTING_TO "... %u"), ssid, attempt);
+        printf(D_WIFI_CONNECTING_TO "... %u", ssid, attempt);
         delay(250);
     }
 #if defined(STM32F4xx)
     LOG_INFO(TAG_WIFI, F(D_NETWORK_IP_ADDRESS_RECEIVED), espIp);
     if((WiFi.status() == WL_CONNECTED && String(espIp) != F("0.0.0.0"))) return true;
 #else
-    LOG_INFO(TAG_WIFI, F(D_NETWORK_IP_ADDRESS_RECEIVED), WiFi.localIP().toString().c_str());
+    printf(D_NETWORK_IP_ADDRESS_RECEIVED, WiFi.localIP().toString().c_str());
     if((WiFi.status() == WL_CONNECTED && WiFi.localIP().toString() != F("0.0.0.0"))) return true;
 #endif
 
-    LOG_WARNING(TAG_WIFI, F(D_NETWORK_IP_ADDRESS_RECEIVED), WiFi.localIP().toString().c_str());
+    printf(D_NETWORK_IP_ADDRESS_RECEIVED, WiFi.localIP().toString().c_str());
     WiFi.disconnect(true);
     return false;
 }
@@ -584,7 +584,7 @@ void wifiStop()
 #if !defined(STM32F4xx)
     WiFi.mode(WIFI_OFF);
 #endif
-    LOG_WARNING(TAG_WIFI, F(D_SERVICE_STOPPED));
+    printf(D_SERVICE_STOPPED);
 }
 
 void wifi_get_statusupdate(char* buffer, size_t len)

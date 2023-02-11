@@ -97,7 +97,7 @@ void mqtt_connected()
     if(!current_mqtt_state) {
         mqtt_reconnect_counter = 0;
         current_mqtt_state     = true; // now we are connected
-        LOG_VERBOSE(TAG_MQTT, F("%s"), current_mqtt_state ? PSTR(D_SERVICE_CONNECTED) : PSTR(D_SERVICE_DISCONNECTED));
+        printf("%s", current_mqtt_state ? PSTR(D_SERVICE_CONNECTED) : PSTR(D_SERVICE_DISCONNECTED));
     }
     mqtt_run_scripts();
 }
@@ -178,7 +178,7 @@ void mqtt_process_topic_payload(const char* topic, const char* payload, unsigned
 {
     if(gui_acquire()) {
         mqttLoop(); // First empty the MQTT queue
-        LOG_TRACE(TAG_MQTT_RCV, F("%s = %s"), topic, payload);
+        printf("%s = %s", topic, payload);
         dispatch_topic_payload(topic, payload, length > 0, TAG_MQTT);
         gui_release();
     } else {
@@ -191,7 +191,7 @@ void mqtt_process_topic_payload(const char* topic, const char* payload, unsigned
         data.payload       = (char*)hasp_calloc(sizeof(char), mqtt_msg_length(payload_len + 1));
 
         if(!data.topic || !data.payload) {
-            LOG_ERROR(TAG_MQTT_RCV, D_ERROR_OUT_OF_MEMORY);
+            printf(D_ERROR_OUT_OF_MEMORY);
             hasp_free(data.topic);
             hasp_free(data.payload);
             return;
@@ -244,7 +244,7 @@ static void mqtt_message_cb(const char* topic, byte* payload, unsigned int lengt
 
     } else {
         // Other topic
-        LOG_ERROR(TAG_MQTT, F(D_MQTT_INVALID_TOPIC));
+        printf(D_MQTT_INVALID_TOPIC);
         return;
     }
 
@@ -289,16 +289,16 @@ static void mqtt_message_cb(const char* topic, byte* payload, unsigned int lengt
 static void mqttSubscribeTo(const char* topic)
 {
     if(esp_mqtt_client_subscribe(mqttClient, topic, 0) == ESP_FAIL) {
-        LOG_ERROR(TAG_MQTT, F(D_MQTT_NOT_SUBSCRIBED), topic);
+        printf(D_MQTT_NOT_SUBSCRIBED, topic);
         mqttFailedCount++;
     } else {
-        LOG_VERBOSE(TAG_MQTT, F(D_BULLET D_MQTT_SUBSCRIBED), topic);
+        printf(D_BULLET D_MQTT_SUBSCRIBED, topic);
     }
 }
 
 void onMqttConnect(esp_mqtt_client_handle_t client)
 {
-    LOG_INFO(TAG_MQTT, F(D_MQTT_CONNECTED), mqttServer, mqttClientId);
+    printf(D_MQTT_CONNECTED, mqttServer, mqttClientId);
 
     // Subscribe to our incoming topics
     char topic[64];
@@ -360,7 +360,7 @@ static void onMqttSubscribed(esp_mqtt_event_handle_t event)
 {
     String topic = String(event->topic).substring(0, event->topic_len);
     String msg   = String(event->data).substring(0, event->data_len);
-    LOG_VERBOSE(TAG_MQTT, F(D_BULLET D_MQTT_SUBSCRIBED " %d %s %d"), topic.c_str(), event->topic_len, msg.c_str(),
+    printf(D_BULLET D_MQTT_SUBSCRIBED " %d %s %d", topic.c_str(), event->topic_len, msg.c_str(),
                 event->data_len);
 }
 
@@ -371,14 +371,14 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
     int msg_id;
     switch(event->event_id) {
         case MQTT_EVENT_DISCONNECTED:
-            LOG_WARNING(TAG_MQTT, F(D_MQTT_DISCONNECTED));
+            printf(D_MQTT_DISCONNECTED);
             mqtt_disconnected();
             break;
         case MQTT_EVENT_BEFORE_CONNECT:
             // LOG_INFO(TAG_MQTT, F(D_MQTT_CONNECTING));
             break;
         case MQTT_EVENT_CONNECTED:
-            LOG_INFO(TAG_MQTT, F(D_SERVICE_STARTED));
+            printf(D_SERVICE_STARTED);
             mqtt_connected();
             onMqttConnect(event->client);
             break;
@@ -393,26 +393,26 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
             esp_mqtt_error_codes_t* error_handle = event->error_handle;
             switch(error_handle->error_type) {
                 case MQTT_ERROR_TYPE_TCP_TRANSPORT:
-                    LOG_ERROR(TAG_MQTT, "Transport error");
+                    printf("Transport error");
                     break;
                 case MQTT_ERROR_TYPE_CONNECTION_REFUSED:
                     switch(error_handle->connect_return_code) {
                         case MQTT_CONNECTION_REFUSE_PROTOCOL: /*!< MQTT connection refused reason: Wrong protocol */
-                            LOG_WARNING(TAG_MQTT, "Connection refused: Wrong protocol");
+                            printf("Connection refused: Wrong protocol");
                             break;
                         case MQTT_CONNECTION_REFUSE_ID_REJECTED: /*!< MQTT connection refused reason: ID rejected */
-                            LOG_WARNING(TAG_MQTT, "Connection refused: ID rejected");
+                            printf("Connection refused: ID rejected");
                             break;
                         case MQTT_CONNECTION_REFUSE_SERVER_UNAVAILABLE: /*!< MQTT connection refused reason: Server
                                                                            unavailable */
-                            LOG_WARNING(TAG_MQTT, "Connection refused: Server unavailable");
+                            printf("Connection refused: Server unavailable");
                             break;
                         case MQTT_CONNECTION_REFUSE_BAD_USERNAME: /*!< MQTT connection refused reason: Wrong user */
-                            LOG_WARNING(TAG_MQTT, "Connection refused: Wrong user");
+                            printf("Connection refused: Wrong user");
                             break;
                         case MQTT_CONNECTION_REFUSE_NOT_AUTHORIZED: /*!< MQTT connection refused reason: Wrong username
                                                                        or password */
-                            LOG_WARNING(TAG_MQTT, "Connection refused: Authentication error");
+                            printf("Connection refused: Authentication error");
                             break;
                         default:;
                     }
@@ -423,7 +423,7 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
             break;
         }
         default:
-            LOG_WARNING(TAG_MQTT, "mqtt_event_handler %d", event->event_id);
+            printf("mqtt_event_handler %d", event->event_id);
     }
     return ESP_OK;
 }
@@ -434,7 +434,7 @@ void mqttSetup()
     preferences.begin("mqtt", true);
     String password = preferences.getString(FP_CONFIG_PASS, MQTT_PASSWORD);
     strncpy(mqttPassword, password.c_str(), sizeof(mqttPassword));
-    LOG_DEBUG(TAG_MQTT, F(D_BULLET "Read %s => %s (%d bytes)"), FP_CONFIG_PASS, password.c_str(), password.length());
+    printf(D_BULLET "Read %s => %s (%d bytes)", FP_CONFIG_PASS, password.c_str(), password.length());
 
     queue = xQueueCreate(64, sizeof(mqtt_message_t));
     esp_crt_bundle_set(rootca_crt_bundle_start);
@@ -449,7 +449,7 @@ void mqttLoop(void)
 
     mqtt_message_t data;
     while(xQueueReceive(queue, &data, (TickType_t)0)) {
-        LOG_WARNING(TAG_MQTT, F("[%d] QUE %s => %s"), uxQueueMessagesWaiting(queue), data.topic, data.payload);
+        printf("[%d] QUE %s => %s", uxQueueMessagesWaiting(queue), data.topic, data.payload);
         size_t length = strlen(data.payload);
         dispatch_topic_payload(data.topic, data.payload, length > 0, TAG_MQTT);
         hasp_free(data.topic);
@@ -473,7 +473,7 @@ void mqttStart()
 
     mqttEnabled = strlen(mqttServer) > 0 && mqttPort > 0;
     if(!mqttEnabled) {
-        LOG_WARNING(TAG_MQTT, F(D_MQTT_NOT_CONFIGURED));
+        printf(D_MQTT_NOT_CONFIGURED);
         return;
     }
 
@@ -485,12 +485,12 @@ void mqttStart()
         snprintf_P(mqttClientId, sizeof(mqttClientId), haspDevice.get_hostname());
         size_t len = strlen(mqttClientId);
         snprintf_P(mqttClientId + len, sizeof(mqttClientId) - len, PSTR("_%s"), mac.c_str());
-        LOG_INFO(TAG_MQTT, mqttClientId);
+        printf(mqttClientId);
     }
 
     strncpy(mqttLwtTopic, mqttNodeTopic, sizeof(mqttNodeTopic));
     strncat_P(mqttLwtTopic, PSTR(MQTT_TOPIC_LWT), sizeof(mqttLwtTopic)-sizeof(mqttNodeTopic));
-    LOG_WARNING(TAG_MQTT, mqttLwtTopic);
+    printf(mqttLwtTopic);
 
     mqtt_cfg.event_handle           = mqtt_event_handler;
     mqtt_cfg.buffer_size            = MQTT_MAX_PACKET_SIZE;
@@ -526,24 +526,24 @@ void mqttStart()
     } else {
         mqttClient = esp_mqtt_client_init(&mqtt_cfg);
         if(esp_mqtt_client_start(mqttClient) != ESP_OK) {
-            LOG_WARNING(TAG_MQTT, F(D_SERVICE_START_FAILED));
+            printf(D_SERVICE_START_FAILED);
             return;
         }
     }
 
-    LOG_INFO(TAG_MQTT, F(D_SERVICE_STARTING));
+    printf(D_SERVICE_STARTING);
 }
 
 void mqttStop()
 {
     if(!mqttEnabled) {
-        LOG_WARNING(TAG_MQTT, F(D_SERVICE_DISABLED));
+        printf(D_SERVICE_DISABLED);
         return;
     }
 
     if(mqttClient != NULL) {
         if(current_mqtt_state) {
-            LOG_TRACE(TAG_MQTT, F(D_MQTT_DISCONNECTING));
+            printf(D_MQTT_DISCONNECTING);
         }
         mqtt_send_lwt(false);
         // esp_err_t err = esp_mqtt_client_stop(mqttClient); // Cannot be called from the *MQTT* event handler
@@ -552,12 +552,12 @@ void mqttStop()
         esp_err_t err = esp_mqtt_client_disconnect(mqttClient);
         if(err == ESP_OK) {
             mqtt_disconnected();
-            LOG_INFO(TAG_MQTT, F(D_MQTT_DISCONNECTED));
+            printf(D_MQTT_DISCONNECTED);
         } else {
-            LOG_ERROR(TAG_MQTT, F(D_MQTT_FAILED " %d"), err);
+            printf(D_MQTT_FAILED " %d", err);
         }
     } else {
-        LOG_INFO(TAG_MQTT, F(D_SERVICE_STOPPED));
+        printf(D_SERVICE_STOPPED);
     }
 }
 

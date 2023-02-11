@@ -34,7 +34,7 @@ void confDebugSet(const __FlashStringHelper* fstr_name)
     /*char buffer[128];
     snprintf_P(buffer, sizeof(buffer), PSTR("   * %s set"), name);
     debugPrintln(buffer);*/
-    LOG_VERBOSE(TAG_CONF, F(D_BULLET "%S set"), fstr_name);
+    printf(D_BULLET "%S set", fstr_name);
 }
 
 bool configSet(bool& value, const JsonVariant& setting, const __FlashStringHelper* fstr_name)
@@ -149,7 +149,7 @@ DeserializationError configParseFile(String& configFile, JsonDocument& settings)
     if(file) {
         size_t size = file.size();
         if(size > 1024) {
-            LOG_ERROR(TAG_CONF, F("Config file size is too large"));
+            printf("Config file size is too large");
             return DeserializationError::NoMemory;
         }
         result = deserializeJson(settings, file);
@@ -177,22 +177,19 @@ DeserializationError configRead(JsonDocument& settings, bool setupdebug)
         /* Load Debug params */
         if(setupdebug) {
             configSetupDebug(settings); // Now we can use log
-            LOG_INFO(TAG_CONF, F("SPI flash FS mounted"));
+            printf("SPI flash FS mounted");
 
             filesystemInfo();
             filesystemList();
         }
 
-        LOG_TRACE(TAG_CONF, F(D_FILE_LOADING), configFile.c_str());
         configStorePasswords(settings, wifiPass, mqttPass, httpPass);
 
         // Output settings in log with masked passwords
         configMaskPasswords(settings);
         serializeJson(settings, output);
-        LOG_VERBOSE(TAG_CONF, output.c_str());
 
         configRestorePasswords(settings, wifiPass, mqttPass, httpPass);
-        LOG_INFO(TAG_CONF, F(D_FILE_LOADED), configFile.c_str());
 
         // if(setupdebug) debugSetup();
         return error;
@@ -211,13 +208,13 @@ DeserializationError configRead(JsonDocument& settings, bool setupdebug)
     if(setupdebug) configSetupDebug(settings); // Now we can use log
 
 #if HASP_USE_SPIFFS > 0 || HASP_USE_LITTLEFS > 0
-    LOG_ERROR(TAG_CONF, F(D_FILE_LOAD_FAILED), configFile.c_str());
+    printf(D_FILE_LOAD_FAILED, configFile.c_str());
 #endif
 
 #if HASP_USE_EEPROM > 0
     configFile = F("EEPROM");
-    LOG_TRACE(TAG_CONF, F(D_FILE_LOADING), configFile.c_str());
-    LOG_INFO(TAG_CONF, F(D_FILE_LOADED), configFile.c_str());
+    printf(D_FILE_LOADING, configFile.c_str());
+    printf(D_FILE_LOADED, configFile.c_str());
 #endif
 
 #if HASP_USE_CONFIG > 0 && defined(HASP_GPIO_TEMPLATE)
@@ -273,9 +270,9 @@ void configWrite()
 
     /* Read Config File */
     DynamicJsonDocument doc(8 * 256);
-    LOG_TRACE(TAG_CONF, F(D_FILE_LOADING), configFile.c_str());
+    printf(D_FILE_LOADING, configFile.c_str());
     configRead(doc, false);
-    LOG_INFO(TAG_CONF, F(D_FILE_LOADED), configFile.c_str());
+    printf(D_FILE_LOADED, configFile.c_str());
 
     // Make sure we have a valid JsonObject to start from
     JsonObject settings;
@@ -294,7 +291,6 @@ void configWrite()
     if(settings[module].as<JsonObject>().isNull()) settings.createNestedObject(module);
     changed = wifiGetConfig(settings[module]);
     if(changed) {
-        LOG_VERBOSE(TAG_WIFI, settingsChanged.c_str());
         configOutput(settings[module], TAG_WIFI);
         writefile = true;
     }
@@ -305,7 +301,6 @@ void configWrite()
     if(settings[module].as<JsonObject>().isNull()) settings.createNestedObject(module);
     changed = mqttGetConfig(settings[module]);
     if(changed) {
-        LOG_VERBOSE(TAG_MQTT, settingsChanged.c_str());
         configOutput(settings[module], TAG_MQTT);
         writefile = true;
     }
@@ -316,7 +311,6 @@ void configWrite()
     if(settings[module].as<JsonObject>().isNull()) settings.createNestedObject(module);
     changed = telnetGetConfig(settings[module]);
     if(changed) {
-        LOG_VERBOSE(TAG_TELN, settingsChanged.c_str());
         configOutput(settings[module], TAG_TELN);
         writefile = true;
     }
@@ -327,7 +321,6 @@ void configWrite()
     if(settings[module].as<JsonObject>().isNull()) settings.createNestedObject(module);
     changed = mdnsGetConfig(settings[module]);
     if(changed) {
-        LOG_VERBOSE(TAG_MDNS, settingsChanged.c_str());
         configOutput(settings[module], TAG_MDNS);
         writefile = true;
     }
@@ -337,7 +330,6 @@ void configWrite()
     if(settings[FPSTR(FP_HTTP)].as<JsonObject>().isNull()) settings.createNestedObject(F("http"));
     changed = httpGetConfig(settings[FPSTR(FP_HTTP)]);
     if(changed) {
-        LOG_VERBOSE(TAG_HTTP, settingsChanged.c_str());
         configOutput(settings[FPSTR(FP_HTTP)], TAG_HTTP);
         writefile = true;
     }
@@ -348,7 +340,6 @@ void configWrite()
     if(settings[module].as<JsonObject>().isNull()) settings.createNestedObject(module);
     changed = gpioGetConfig(settings[module]);
     if(changed) {
-        LOG_VERBOSE(TAG_GPIO, settingsChanged.c_str());
         configOutput(settings[module], TAG_GPIO);
         writefile = true;
     }
@@ -358,7 +349,6 @@ void configWrite()
     if(settings[module].as<JsonObject>().isNull()) settings.createNestedObject(module);
     changed = debugGetConfig(settings[module]);
     if(changed) {
-        LOG_VERBOSE(TAG_DEBG, settingsChanged.c_str());
         configOutput(settings[module], TAG_DEBG);
         writefile = true;
     }
@@ -366,7 +356,6 @@ void configWrite()
     if(settings[FPSTR(FP_GUI)].as<JsonObject>().isNull()) settings.createNestedObject(FPSTR(FP_GUI));
     changed = guiGetConfig(settings[FPSTR(FP_GUI)]);
     if(changed) {
-        LOG_VERBOSE(TAG_GUI, settingsChanged.c_str());
         configOutput(settings[FPSTR(FP_GUI)], TAG_GUI);
         writefile = true;
     }
@@ -374,7 +363,6 @@ void configWrite()
     if(settings[FPSTR(FP_HASP)].as<JsonObject>().isNull()) settings.createNestedObject(FPSTR(FP_HASP));
     changed = haspGetConfig(settings[FPSTR(FP_HASP)]);
     if(changed) {
-        LOG_VERBOSE(TAG_HASP, settingsChanged.c_str());
         configOutput(settings[FPSTR(FP_HASP)], TAG_HASP);
         writefile = true;
     }
@@ -385,19 +373,18 @@ void configWrite()
 #if HASP_USE_SPIFFS > 0 || HASP_USE_LITTLEFS > 0
         File file = HASP_FS.open(configFile, "w");
         if(file) {
-            LOG_TRACE(TAG_CONF, F(D_FILE_SAVING), configFile.c_str());
             WriteBufferingStream bufferedFile(file, 256);
             size_t size = serializeJson(doc, bufferedFile);
             bufferedFile.flush();
             file.close();
             if(size > 0) {
-                LOG_INFO(TAG_CONF, F(D_FILE_SAVED), configFile.c_str());
+                printf(D_FILE_SAVED, configFile.c_str());
                 // configBackupToEeprom();
             } else {
-                LOG_ERROR(TAG_CONF, F(D_FILE_SAVE_FAILED), configFile.c_str());
+                printf(D_FILE_SAVE_FAILED, configFile.c_str());
             }
         } else {
-            LOG_ERROR(TAG_CONF, F(D_FILE_SAVE_FAILED), configFile.c_str());
+            printf(D_FILE_SAVE_FAILED, configFile.c_str());
         }
 #endif
 
@@ -426,7 +413,7 @@ void configWrite()
 #endif
 
     } else {
-        LOG_INFO(TAG_CONF, F(D_CONFIG_NOT_CHANGED));
+        printf(D_CONFIG_NOT_CHANGED);
     }
     configOutput(settings, TAG_CONF);
 }
@@ -446,7 +433,7 @@ void configSetup()
         } else {
 #if HASP_USE_SPIFFS > 0 || HASP_USE_LITTLEFS > 0
             if(!filesystemSetup()) {
-                LOG_ERROR(TAG_CONF, F("FILE: SPI flash init failed. Unable to mount FS: Using default settings..."));
+                printf("FILE: SPI flash init failed. Unable to mount FS: Using default settings...");
                 // return; // Keep going and initialize the console with default settings
             }
 #endif
@@ -454,45 +441,45 @@ void configSetup()
         }
 
         //#if HASP_USE_SPIFFS > 0
-        LOG_INFO(TAG_DEBG, F("Loading debug settings"));
+        printf("Loading debug settings");
         debugSetConfig(settings[FPSTR(FP_DEBUG)]);
-        LOG_INFO(TAG_GPIO, F("Loading GUI settings"));
+        printf("Loading GUI settings");
         guiSetConfig(settings[FPSTR(FP_GUI)]);
-        LOG_INFO(TAG_HASP, F("Loading HASP settings"));
+        printf("Loading HASP settings");
         haspSetConfig(settings[FPSTR(FP_HASP)]);
         // otaGetConfig(settings[F("ota")]);
 
 #if HASP_USE_WIFI > 0
-        LOG_INFO(TAG_WIFI, F("Loading WiFi settings"));
+        printf("Loading WiFi settings");
         wifiSetConfig(settings[FPSTR(FP_WIFI)]);
 #endif
 
 #if HASP_USE_MQTT > 0
-        LOG_INFO(TAG_MQTT, F("Loading MQTT settings"));
+        printf("Loading MQTT settings");
         mqttSetConfig(settings[FPSTR(FP_MQTT)]);
 #endif
 
 #if HASP_USE_TELNET > 0
-        LOG_INFO(TAG_TELN, F("Loading Telnet settings"));
+        printf("Loading Telnet settings");
         telnetSetConfig(settings[F("telnet")]);
 #endif
 
 #if HASP_USE_MDNS > 0
-        LOG_INFO(TAG_MDNS, F("Loading MDNS settings"));
+        printf("Loading MDNS settings");
         mdnsSetConfig(settings[FPSTR(FP_MDNS)]);
 #endif
 
 #if HASP_USE_HTTP > 0
-        LOG_INFO(TAG_HTTP, F("Loading HTTP settings"));
+        printf("Loading HTTP settings");
         httpSetConfig(settings[FPSTR(FP_HTTP)]);
 #endif
 
 #if HASP_USE_GPIO > 0
-        LOG_INFO(TAG_GPIO, F("Loading GPIO settings"));
+        printf("Loading GPIO settings");
         gpioSetConfig(settings[FPSTR(FP_GPIO)]);
 #endif
 
-        LOG_INFO(TAG_CONF, F(D_CONFIG_LOADED));
+        printf(D_CONFIG_LOADED);
     }
     //#endif
 }
@@ -542,7 +529,7 @@ void configOutput(const JsonObject& settings, uint8_t tag)
         output.replace(password, passmask);
     }
 
-    LOG_VERBOSE(tag, output.c_str());
+    printf(output.c_str());
 }
 
 bool configClearEeprom()

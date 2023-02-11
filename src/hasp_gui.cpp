@@ -55,7 +55,7 @@ static lv_disp_buf_t disp_buf;
 
 static inline void gui_init_lvgl()
 {
-    LOG_VERBOSE(TAG_LVGL, F("Version    : %u.%u.%u %s"), LVGL_VERSION_MAJOR, LVGL_VERSION_MINOR, LVGL_VERSION_PATCH,
+    printf("Version    : %u.%u.%u %s", LVGL_VERSION_MAJOR, LVGL_VERSION_MINOR, LVGL_VERSION_PATCH,
                 PSTR(LVGL_VERSION_INFO));
     lv_init();
 
@@ -81,13 +81,13 @@ static inline void gui_init_lvgl()
     if(guiVdbBuffer1 && guiVDBsize > 0) {
         lv_disp_buf_init(&disp_buf, guiVdbBuffer1, NULL, guiVDBsize);
     } else {
-        LOG_FATAL(TAG_GUI, F(D_ERROR_OUT_OF_MEMORY));
+        printf(D_ERROR_OUT_OF_MEMORY);
     }
 
 #ifdef LV_MEM_SIZE
-    LOG_VERBOSE(TAG_LVGL, F("MEM size   : %d"), LV_MEM_SIZE);
+    printf("MEM size   : %d", LV_MEM_SIZE);
 #endif
-    LOG_VERBOSE(TAG_LVGL, F("VFB size   : %d"), (size_t)sizeof(lv_color_t) * guiVDBsize);
+    printf("VFB size   : %d", (size_t)sizeof(lv_color_t) * guiVDBsize);
 }
 
 void gui_hide_pointer(bool hidden)
@@ -126,7 +126,7 @@ void gui_antiburn_cb(lv_disp_drv_t* disp, const lv_area_t* area, lv_color_t* col
 void gui_monitor_cb(lv_disp_drv_t* disp_drv, uint32_t time, uint32_t px)
 {
     // if(screenshotIsDirty) return;
-    LOG_DEBUG(TAG_GUI, F("The Screen is dirty"));
+    printf("The Screen is dirty");
     screenshotIsDirty = true;
 }
 
@@ -145,9 +145,9 @@ void gui_start_tft(void)
 static inline void gui_init_tft(void)
 {
     // Initialize TFT
-    LOG_TRACE(TAG_TFT, F(D_SERVICE_STARTING));
+    printf(D_SERVICE_STARTING);
     //TODO: Implement
-    LOG_INFO(TAG_TFT, F(D_SERVICE_STARTED));
+    printf(D_SERVICE_STARTED);
 }
 
 // initialize the image decoders
@@ -178,7 +178,7 @@ static inline void gui_init_filesystems()
 {
 #if LV_USE_FS_IF != 0
     //_lv_fs_init(); // lvgl File System -- not needed, it done in lv_init() when LV_USE_FILESYSTEM is set
-    LOG_VERBOSE(TAG_LVGL, F("Filesystem : " D_SETTING_ENABLED));
+    printf("Filesystem : " D_SETTING_ENABLED);
     lv_fs_if_init(); // auxilary file system drivers
     // filesystem_list_path("L:/");
 
@@ -186,10 +186,10 @@ static inline void gui_init_filesystems()
     lv_fs_res_t res;
     res = lv_fs_open(&f, "L:/config.json", LV_FS_MODE_RD);
     if(res == LV_FS_RES_OK) {
-        LOG_VERBOSE(TAG_HASP, F("TEST Opening config.json OK"));
+        printf("TEST Opening config.json OK");
         lv_fs_close(&f);
     } else {
-        LOG_ERROR(TAG_HASP, F("TEST Opening config.json from FS failed %d"), res);
+        printf("TEST Opening config.json from FS failed %d", res);
     }
 
 #else
@@ -204,7 +204,7 @@ void guiSetup()
     haspDevice.show_info(); // debug info + preload app flash size
 
     // Initialize LVGL
-    LOG_TRACE(TAG_LVGL, F(D_SERVICE_STARTING));
+    printf(D_SERVICE_STARTING);
     gui_init_lvgl();
     gui_init_images();
     gui_init_filesystems();
@@ -288,7 +288,7 @@ void guiSetup()
     mouse_indev->driver.type = LV_INDEV_TYPE_POINTER;
 
     /*Set a cursor for the mouse*/
-    LOG_TRACE(TAG_GUI, F("Initialize Cursor"));
+    printf("Initialize Cursor");
     lv_obj_t* mouse_layer = lv_disp_get_layer_sys(NULL); // default display
 
 #if defined(ARDUINO_ARCH_ESP32)
@@ -321,7 +321,7 @@ void guiSetup()
     lv_obj_set_style_local_bg_color(lv_layer_sys(), LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
     lv_obj_set_style_local_bg_opa(lv_layer_sys(), LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_0);
 
-    LOG_INFO(TAG_LVGL, F(D_SERVICE_STARTED));
+    printf(D_SERVICE_STARTED);
 }
 
 void guiLoop(void)
@@ -415,7 +415,7 @@ bool guiGetConfig(const JsonObject& settings)
     uint8_t i       = 0;
     size_t len      = sizeof(gui_settings.cal_data) / sizeof(gui_settings.cal_data[0]);
     for(JsonVariant v : array) {
-        LOG_VERBOSE(TAG_GUI, F("GUI CONF: %d: %d <=> %d"), i, gui_settings.cal_data[i], v.as<uint16_t>());
+        printf("GUI CONF: %d: %d <=> %d", i, gui_settings.cal_data[i], v.as<uint16_t>());
         if(i < len) {
             if(gui_settings.cal_data[i] != v.as<uint16_t>()) changed = true;
             v.set(gui_settings.cal_data[i]);
@@ -469,7 +469,7 @@ bool guiSetConfig(const JsonObject& settings)
 
     if(!settings[FPSTR(FP_GUI_POINTER)].isNull()) {
         if(gui_settings.show_pointer != settings[FPSTR(FP_GUI_POINTER)].as<bool>()) {
-            LOG_VERBOSE(TAG_GUI, F("guiShowPointer set"));
+            printf("guiShowPointer set");
         }
         changed |= gui_settings.show_pointer != settings[FPSTR(FP_GUI_POINTER)].as<bool>();
 
@@ -493,12 +493,12 @@ bool guiSetConfig(const JsonObject& settings)
 
         if(gui_settings.cal_data[0] != 0 || gui_settings.cal_data[1] != 65535 || gui_settings.cal_data[2] != 0 ||
            gui_settings.cal_data[3] != 65535) {
-            LOG_VERBOSE(TAG_GUI, F("calData set [%u, %u, %u, %u, %u]"), gui_settings.cal_data[0],
+            printf("calData set [%u, %u, %u, %u, %u]", gui_settings.cal_data[0],
                         gui_settings.cal_data[1], gui_settings.cal_data[2], gui_settings.cal_data[3],
                         gui_settings.cal_data[4]);
             oobeSetAutoCalibrate(false);
         } else {
-            LOG_TRACE(TAG_GUI, F("First Touch Calibration enabled"));
+            printf("First Touch Calibration enabled");
             oobeSetAutoCalibrate(true);
         }
 
@@ -556,7 +556,7 @@ static void gui_get_bitmap_header(uint8_t* buffer, size_t bufsize)
 
 void gui_flush_not_complete()
 {
-    LOG_WARNING(TAG_GUI, F("Pixelbuffer not completely sent"));
+    printf("Pixelbuffer not completely sent");
 }
 #endif // HASP_USE_SPIFFS > 0 || HASP_USE_LITTLEFS > 0 || HASP_USE_HTTP > 0
 
@@ -592,7 +592,7 @@ void guiTakeScreenshot(const char* pFileName)
 
         size_t len = pFileOut.write(buffer, sizeof(buffer));
         if(len == sizeof(buffer)) {
-            LOG_VERBOSE(TAG_GUI, F("Bitmap header written"));
+            printf("Bitmap header written");
 
             /* Refresh screen to screenshot callback */
             lv_disp_t* disp       = lv_disp_get_default();
@@ -603,15 +603,15 @@ void guiTakeScreenshot(const char* pFileName)
             lv_refr_now(NULL);                            /* Will call our disp_drv.disp_flush function */
             disp->driver.flush_cb = drv_display_flush_cb; /* restore callback */
 
-            LOG_VERBOSE(TAG_GUI, F("Bitmap data flushed to %s"), pFileName);
+            printf("Bitmap data flushed to %s", pFileName);
 
         } else {
-            LOG_ERROR(TAG_GUI, F("Data written does not match header size"));
+            printf("Data written does not match header size");
         }
         pFileOut.close();
 
     } else {
-        LOG_WARNING(TAG_GUI, F(D_FILE_SAVE_FAILED), pFileName);
+        printf(D_FILE_SAVE_FAILED, pFileName);
     }
 }
 #endif
@@ -649,7 +649,7 @@ void guiTakeScreenshot()
     gui_get_bitmap_header(buffer, sizeof(buffer));
 
     if(httpClientWrite(buffer, sizeof(buffer)) == sizeof(buffer)) {
-        LOG_VERBOSE(TAG_GUI, F("Bitmap header sent"));
+        printf("Bitmap header sent");
 
         lv_disp_t* disp      = lv_disp_get_default();
         drv_display_flush_cb = disp->driver.flush_cb; /* store callback */
@@ -673,9 +673,9 @@ void guiTakeScreenshot()
         }
 
         screenshotIsDirty = false;
-        LOG_VERBOSE(TAG_GUI, F("Bitmap data flushed to webclient"));
+        printf("Bitmap data flushed to webclient");
     } else {
-        LOG_ERROR(TAG_GUI, F("Data sent does not match header size"));
+        printf("Data sent does not match header size");
     }
 }
 
@@ -687,7 +687,7 @@ bool guiScreenshotIsDirty()
 uint32_t guiScreenshotEtag()
 {
     screenshotEtag += screenshotIsDirty;
-    LOG_DEBUG(TAG_GUI, F("The ETag is %u"), screenshotEtag);
+    printf("The ETag is %u", screenshotEtag);
     return screenshotEtag;
 }
 #endif

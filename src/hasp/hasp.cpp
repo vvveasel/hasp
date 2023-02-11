@@ -8,7 +8,7 @@
 #include "hasp_gui.h"
 
 #ifdef ARDUINO
-#include "ArduinoLog.h"
+//#include "ArduinoLog.h"
 #endif
 
 #if defined(WINDOWS) || defined(POSIX)
@@ -289,7 +289,7 @@ void hasp_set_antiburn(int32_t repeat_count, uint32_t period)
             lv_obj_invalidate(lv_scr_act());
 
         } else {
-            LOG_INFO(TAG_HASP, F("Antiburn %s"), D_INFO_FAILED);
+            printf("Antiburn %s", D_INFO_FAILED);
         }
     } else {
         hasp_stop_antiburn();
@@ -316,7 +316,7 @@ void hasp_set_wakeup_touch(bool en)
         hasp_first_touch_state = en;
         lv_obj_set_event_cb(layer, first_touch_event_handler);
         lv_obj_set_click(layer, en);
-        LOG_INFO(TAG_HASP, F("First touch %s"), en ? D_SETTING_ENABLED : D_SETTING_DISABLED);
+        printf("First touch %s", en ? D_SETTING_ENABLED : D_SETTING_DISABLED);
     }
 }
 
@@ -528,14 +528,14 @@ void hasp_set_theme(uint8_t themeid)
 
         default:
 
-            LOG_ERROR(TAG_HASP, F("Unknown theme selected"));
+            printf("Unknown theme selected");
     }
 
     if(th) {
         lv_theme_set_act(th);
-        LOG_INFO(TAG_HASP, F("Custom theme loaded"));
+        printf("Custom theme loaded");
     } else {
-        LOG_ERROR(TAG_HASP, F("Theme could not be loaded"));
+        printf("Theme could not be loaded");
     }
 }
 
@@ -685,11 +685,11 @@ void haspClearPage(uint16_t pageid)
 {
     lv_obj_t* page = haspPages.get_obj(pageid);
     if(!page || (pageid > HASP_NUM_PAGES)) {
-        LOG_WARNING(TAG_HASP, F(D_HASP_INVALID_PAGE), pageid);
+        printf(D_HASP_INVALID_PAGE, pageid);
     } else if(page == lv_layer_sys() /*|| page == lv_layer_top()*/) {
-        LOG_WARNING(TAG_HASP, F(D_HASP_INVALID_LAYER));
+        printf(D_HASP_INVALID_LAYER);
     } else {
-        LOG_TRACE(TAG_HASP, F(D_HASP_CLEAR_PAGE), pageid);
+        printf(D_HASP_CLEAR_PAGE, pageid);
         lv_obj_clean(page);
     }
 }

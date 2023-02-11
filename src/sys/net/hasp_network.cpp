@@ -34,7 +34,7 @@ void network_connected()
 
     current_network_state     = true; // now we are connected
     network_reconnect_counter = 0;
-    LOG_VERBOSE(TAG_NETW, F("Connected = %s"),
+    printf("Connected = %s",
                 WiFi.status() == WL_CONNECTED ? PSTR(D_NETWORK_ONLINE) : PSTR(D_NETWORK_OFFLINE));
 }
 

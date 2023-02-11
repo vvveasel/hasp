@@ -85,7 +85,7 @@ bool otaUpdateCheck()
 { // firmware update check
     WiFiClientSecure wifiUpdateClientSecure;
     HTTPClient updateClient;
-    LOG_TRACE(TAG_OTA, F(D_OTA_CHECK_UPDATE), otaUrl.c_str());
+    printf(D_OTA_CHECK_UPDATE, otaUrl.c_str());
 
     // wifiUpdateClientSecure.setInsecure();
     // wifiUpdateClientSecure.setBufferSizes(512, 512);
@@ -93,7 +93,7 @@ bool otaUpdateCheck()
 
     int httpCode = updateClient.GET(); // start connection and send HTTP header
     if(httpCode != HTTP_CODE_OK) {
-        LOG_ERROR(TAG_OTA, F(D_OTA_CHECK_FAILED), updateClient.errorToString(httpCode).c_str());
+        printf(D_OTA_CHECK_FAILED, updateClient.errorToString(httpCode).c_str());
         return false;
     }
 
@@ -114,14 +114,14 @@ bool otaUpdateCheck()
             //     debugPrintln(String(F("UPDATE: New ESP version available: ")) + String(updateEspAvailableVersion));
             // }
         }
-        LOG_VERBOSE(TAG_OTA, F(D_OTA_CHECK_COMPLETE));
+        printf(D_OTA_CHECK_COMPLETE);
     }
     return true;
 }
 
 static inline void otaProgress(void)
 {
-    LOG_VERBOSE(TAG_OTA, F("%s %d%%"),
+    printf("%s %d%%",
                 (ArduinoOTA.getCommand() == U_FLASH ? F(D_OTA_UPDATING_FIRMWARE) : F(D_OTA_UPDATING_FILESYSTEM)),
                 otaPrecentageComplete);
 }
@@ -133,7 +133,7 @@ static void ota_on_start(void)
         // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
     }
 
-    LOG_TRACE(TAG_OTA, F(D_SERVICE_STARTING));
+    printf(D_SERVICE_STARTING);
     haspProgressMsg(F(D_OTA_UPDATE_FIRMWARE));
     haspProgressVal(0);
     otaPrecentageComplete = 0;
@@ -256,14 +256,14 @@ static void ota_on_http_progress(unsigned int progress, unsigned int total)
     haspProgressVal(otaPrecentageComplete);
 
     if(millis() - htppLastLoopTime < 1250) return;
-    LOG_VERBOSE(TAG_OTA, F(D_OTA_UPDATING_FIRMWARE " %d%%"), otaPrecentageComplete);
+    printf(D_OTA_UPDATING_FIRMWARE " %d%%", otaPrecentageComplete);
     htppLastLoopTime = millis();
 }
 
 static void ota_on_http_end(void)
 {
     otaPrecentageComplete = 100;
-    LOG_TRACE(TAG_OTA, F(D_OTA_UPDATE_COMPLETE));
+    printf(D_OTA_UPDATE_COMPLETE);
     haspProgressVal(100);
     haspProgressMsg(F(D_OTA_UPDATE_APPLY));
     otaPrecentageComplete = -1;
@@ -272,7 +272,7 @@ static void ota_on_http_end(void)
 static void ota_on_http_error(int error)
 {
     otaPrecentageComplete = -1;
-    LOG_ERROR(TAG_OTA, F("%s (%d)"), "HTTP Update error", error);
+    printf("%s (%d)", "HTTP Update error", error);
     haspProgressMsg(F(D_OTA_UPDATE_FAILED));
 }
 
@@ -283,7 +283,7 @@ void ota_http_update(const char* url)
     followRedirects_t redirectCode;
 
     if(secureClient.connected() && url == strstr_P(url, PSTR("https://"))) { // not start with https
-        LOG_ERROR(TAG_OTA, F("HTTP_UPDATE_FAILED client is already connected"));
+        printf("HTTP_UPDATE_FAILED client is already connected");
         return;
     } else {
         StaticJsonDocument<512> doc; // update update url, get redirect setting
@@ -294,15 +294,15 @@ void ota_http_update(const char* url)
         switch(settings["redirect"].as<uint8_t>()) {
             case 1:
                 redirectCode = HTTPC_STRICT_FOLLOW_REDIRECTS;
-                LOG_VERBOSE(TAG_OTA, F("Strict follow redirects"));
+                printf("Strict follow redirects");
                 break;
             case 2:
                 redirectCode = HTTPC_FORCE_FOLLOW_REDIRECTS;
-                LOG_VERBOSE(TAG_OTA, F("Force follow redirects"));
+                printf("Force follow redirects");
                 break;
             default:
                 redirectCode = HTTPC_DISABLE_FOLLOW_REDIRECTS;
-                LOG_VERBOSE(TAG_OTA, F("Disable follow redirects"));
+                printf("Disable follow redirects");
                 settings["redirect"] = 0;
         }
         otaSetConfig(settings);
@@ -342,16 +342,16 @@ void ota_http_update(const char* url)
 
     switch(returnCode) {
         case HTTP_UPDATE_FAILED:
-            LOG_ERROR(TAG_OTA, F("HTTP_UPDATE_FAILED error %i %s"), httpUpdate.getLastError(),
+            printf("HTTP_UPDATE_FAILED error %i %s", httpUpdate.getLastError(),
                       httpUpdate.getLastErrorString().c_str());
             break;
 
         case HTTP_UPDATE_NO_UPDATES:
-            LOG_TRACE(TAG_OTA, F("HTTP_UPDATE_NO_UPDATES"));
+            printf("HTTP_UPDATE_NO_UPDATES");
             break;
 
         case HTTP_UPDATE_OK:
-            LOG_TRACE(TAG_OTA, F("HTTP_UPDATE_OK"));
+            printf("HTTP_UPDATE_OK");
             dispatch_reboot(true);
             delay(5000);
     }

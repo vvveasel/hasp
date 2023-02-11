@@ -28,11 +28,11 @@ void mdnsSetup()
 void mdnsStart()
 {
     if(!mdns_config.enable) {
-        LOG_TRACE(TAG_MDNS, F(D_SERVICE_DISABLED));
+        printf(D_SERVICE_DISABLED);
         return;
     }
 
-    LOG_TRACE(TAG_MDNS, F(D_SERVICE_STARTING));
+    printf(D_SERVICE_STARTING);
 
     // Setup mDNS service discovery if enabled
 
@@ -72,9 +72,9 @@ void mdnsStart()
         MDNS.addService(service, proto, 23);
         // }
 
-        LOG_INFO(TAG_MDNS, F(D_SERVICE_STARTED));
+        printf(D_SERVICE_STARTED);
     } else {
-        LOG_ERROR(TAG_MDNS, F(D_SERVICE_START_FAILED));
+        printf(D_SERVICE_START_FAILED);
     }
 }
 

@@ -54,7 +54,7 @@ const char FP_MQTT_HA_MANUFACTURER[] PROGMEM = "mf";
 
 void mqtt_ha_send_json(char* topic, JsonDocument& doc)
 {
-    LOG_VERBOSE(TAG_MQTT_PUB, topic);
+    printf(topic);
 
     // size_t n;
     // LOG_VERBOSE(TAG_MQTT_PUB, " >>> measureJson & serializeJson start ");
@@ -289,7 +289,7 @@ void mqtt_ha_register_activepage()
 
 void mqtt_ha_register_auto_discovery()
 {
-    LOG_TRACE(TAG_MQTT_PUB, F(D_MQTT_HA_AUTO_DISCOVERY));
+    printf(D_MQTT_HA_AUTO_DISCOVERY);
     mqtt_ha_register_activepage();
     // mqtt_ha_register_button(0, 1);
     // mqtt_ha_register_button(0, 2);

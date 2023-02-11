@@ -4,7 +4,9 @@
 #ifndef HASP_HAL_H
 #define HASP_HAL_H
 
-#include <Arduino.h>
+//#include <Arduino.h>
+#include <Wstring.h>
+
 
 // void halRestartMcu(void);
 // String halGetResetInfo(void);

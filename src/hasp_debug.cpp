@@ -144,21 +144,6 @@ void debugLvglLogEvent(lv_log_level_t level, const char* file, uint32_t line, co
     // lv_mem_monitor_t mem_mon;
     // lv_mem_monitor(&mem_mon);
 
-    /* Reduce the number of repeated debug message */
-    // if(line != lastDbgLine || mem_mon.free_biggest_size != lastDbgFreeMem) {
-    switch(level) {
-        case LV_LOG_LEVEL_TRACE:
-            LOG_VERBOSE(TAG_LVGL, descr);
-            break;
-        case LV_LOG_LEVEL_WARN:
-            LOG_WARNING(TAG_LVGL, descr);
-            break;
-        case LV_LOG_LEVEL_ERROR:
-            LOG_ERROR(TAG_LVGL, descr);
-            break;
-        default:
-            LOG_TRACE(TAG_LVGL, descr);
-    }
     last_funcname = funcname;
     lastDbgLine   = line;
     // lastDbgFreeMem = mem_mon.free_biggest_size;
@@ -169,31 +154,18 @@ void debugLvglLogEvent(lv_log_level_t level, const char* file, uint32_t line, co
 // Send the HASP header and version to the output device specified
 void debugPrintHaspHeader(Print* output)
 {
-#ifdef ARDUINO
-    if(debugAnsiCodes) output->print(TERM_COLOR_YELLOW);
+    output->print(TERM_COLOR_YELLOW);
     output->println();
-    output->print(F("\r\n"
+    output->printf("\r\n"
                     "        open____ _____ _____ _____\r\n"
                     "          |  |  |  _  |   __|  _  |\r\n"
                     "          |     |     |__   |   __|\r\n"
                     "          |__|__|__|__|_____|__|\r\n"
                     "        Home Automation Switch Plate\r\n"
-                    "        Open Hardware edition v"));
+                    "        Open Hardware edition v");
     output->println(haspDevice.get_version());
     output->println();
-#else
-    if(debugAnsiCodes) debug_print(output, TERM_COLOR_YELLOW);
-    debug_print(output, F("\r\n"
-                          "        open____ _____ _____ _____\r\n"
-                          "          |  |  |  _  |   __|  _  |\r\n"
-                          "          |     |     |__   |   __|\r\n"
-                          "          |__|__|__|__|_____|__|\r\n"
-                          "        Home Automation Switch Plate\r\n"
-                          "        Open Hardware edition v"));
-    debug_print(output, haspDevice.get_version());
-    debug_newline(output);
-    debug_newline(output);
-#endif
+
 }
 
 void debug_get_tag(uint8_t tag, char* buffer)
@@ -373,29 +345,7 @@ static void debugPrintTaskName(int level, Print* _logOutput)
 
 static void debugPrintPriority(int level, Print* _logOutput)
 {
-    switch(level) {
-        case LOG_LEVEL_FATAL ... LOG_LEVEL_ERROR:
-            debugSendAnsiCode(F(TERM_COLOR_RED), _logOutput);
-            break;
-        case LOG_LEVEL_WARNING:
-            debugSendAnsiCode(F(TERM_COLOR_YELLOW), _logOutput);
-            break;
-        case LOG_LEVEL_NOTICE:
-            debugSendAnsiCode(F(TERM_COLOR_WHITE), _logOutput);
-            break;
-        case LOG_LEVEL_TRACE:
-            debugSendAnsiCode(F(TERM_COLOR_GRAY), _logOutput);
-            break;
-        case LOG_LEVEL_VERBOSE:
-            debugSendAnsiCode(F(TERM_COLOR_CYAN), _logOutput);
-            break;
-        case LOG_LEVEL_DEBUG:
-            debugSendAnsiCode(F(TERM_COLOR_BLUE), _logOutput);
-            break;
-        case LOG_LEVEL_OUTPUT:
-        default:
-            debugSendAnsiCode(F(TERM_COLOR_RESET), _logOutput);
-    }
+    debugSendAnsiCode(F(TERM_COLOR_RESET), _logOutput);
 }
 
 void debugPrintPrefix(uint8_t tag, int level, Print* _logOutput)
@@ -419,9 +369,9 @@ void debugPrintPrefix(uint8_t tag, int level, Print* _logOutput)
     debugPrintTaskName(level, _logOutput);
 #endif
 
-    if(tag == TAG_MQTT_PUB && level == LOG_LEVEL_NOTICE) {
+    if(tag == TAG_MQTT_PUB) {
         debugSendAnsiCode(F(TERM_COLOR_GREEN), _logOutput);
-    } else if(tag == TAG_MQTT_RCV && level == LOG_LEVEL_NOTICE) {
+    } else if(tag == TAG_MQTT_RCV) {
         debugSendAnsiCode(F(TERM_COLOR_ORANGE), _logOutput);
     } else {
         debugPrintPriority(level, _logOutput);

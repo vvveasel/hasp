@@ -45,8 +45,8 @@ void pico_Device::reboot()
 
 void pico_Device::show_info()
 {
-    LOG_VERBOSE(TAG_DEV, F("Processor  : pico"));
-    LOG_VERBOSE(TAG_DEV, F("CPU freq.  : %i MHz"), 125);
+    printf("Processor  : pico");
+    printf("CPU freq.  : %i MHz", 125);
 }
 
 const char* pico_Device::get_core_version()

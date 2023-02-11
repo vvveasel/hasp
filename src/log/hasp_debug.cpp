@@ -376,7 +376,7 @@ void debugPrintSuffix(uint8_t tag, int level, Print* _logOutput)
 void debugStartSerial()
 {
     if(debugSerialBaud < 0) {
-        LOG_WARNING(TAG_DEBG, F(D_SERVICE_DISABLED " (%u Bps)"), debugSerialBaud);
+        printf(D_SERVICE_DISABLED " (%u Bps)", debugSerialBaud);
         //  return;
     }
 
@@ -392,25 +392,18 @@ void debugStartSerial()
 
     HASP_SERIAL.begin(baudrate); /* prepare for possible serial debug */
     delay(10);
-    Log.registerOutput(0, &HASP_SERIAL, HASP_LOG_LEVEL, true); // LOG_LEVEL_VERBOSE
 
     HASP_SERIAL.println();
     debugPrintHaspHeader(&HASP_SERIAL);
     HASP_SERIAL.flush();
 
-    LOG_INFO(TAG_DEBG, F(D_SERVICE_STARTED " @ %u bps"), debugSerialBaud);
-    LOG_INFO(TAG_DEBG, F(D_INFO_ENVIRONMENT ": " PIOENV));
+    printf(D_SERVICE_STARTED " @ %u bps", debugSerialBaud);
+    printf(D_INFO_ENVIRONMENT ": " PIOENV);
 }
 
 // Do NOT call Log function before debugSetup is called
 void debugSetup(JsonObject settings)
 {
-    Log.begin(LOG_LEVEL_WARNING, true);
-    Log.setPrefix(debugPrintPrefix); // Uncomment to get timestamps as prefix
-    Log.setSuffix(debugPrintSuffix); // Uncomment to get newline as suffix
-    Log.unregisterOutput(0);
-    Log.unregisterOutput(1);
-    Log.unregisterOutput(3);
 
 #if HASP_USE_CONFIG > 0
     if(!settings[FPSTR(FP_CONFIG_BAUD)].isNull()) {

@@ -20,7 +20,7 @@ bool Page::is_valid(uint8_t pageid)
 {
     if(pageid > 0 && pageid <= HASP_NUM_PAGES) return true;
 
-    LOG_WARNING(TAG_HASP, F(D_HASP_INVALID_PAGE), pageid);
+    printf(D_HASP_INVALID_PAGE, pageid);
     return false;
 }
 
@@ -37,7 +37,7 @@ uint8_t Page::count()
 void Page::swap(lv_obj_t* page, uint8_t id)
 {
     if(id > count()) {
-        LOG_WARNING(TAG_HASP, "Invalid page id %d", id);
+        printf("Invalid page id %d", id);
         return;
     }
 
@@ -83,10 +83,10 @@ void Page::clear(uint8_t pageid)
 {
     lv_obj_t* page = get_obj(pageid);
     if(page == lv_layer_top() || is_valid(pageid)) {
-        LOG_TRACE(TAG_HASP, F(D_HASP_CLEAR_PAGE), pageid);
+        printf(D_HASP_CLEAR_PAGE, pageid);
         lv_obj_clean(page);
     } else {
-        LOG_WARNING(TAG_HASP, F(D_HASP_INVALID_LAYER)); // lv_layer_sys
+        printf(D_HASP_INVALID_LAYER); // lv_layer_sys
     }
 }
 
@@ -97,7 +97,7 @@ void Page::set(uint8_t pageid, lv_scr_load_anim_t anim_type, uint32_t time, uint
     lv_obj_t* page = get_obj(pageid);
     if(!page) {
         // Invalid page object
-        LOG_WARNING(TAG_HASP, F(D_HASP_INVALID_PAGE), pageid);
+        printf(D_HASP_INVALID_PAGE, pageid);
 
     } else if(page == lv_scr_act()) {
         // No change needed, just send current page again
@@ -110,7 +110,7 @@ void Page::set(uint8_t pageid, lv_scr_load_anim_t anim_type, uint32_t time, uint
 
     } else {
         // No delay or animation set, update now
-        LOG_TRACE(TAG_HASP, F(D_HASP_CHANGE_PAGE), pageid);
+        printf(D_HASP_CHANGE_PAGE, pageid);
         lv_scr_load_anim(page, anim_type, time, delay, false);
         _current_page = pageid;
         dispatch_current_page();
@@ -158,30 +158,30 @@ void Page::set_back(uint8_t pageid, uint8_t backid)
 void Page::set_name(uint8_t pageid, const char* name)
 {
     if(pageid > HASP_NUM_PAGES) {
-        LOG_WARNING(TAG_HASP, F(D_HASP_INVALID_PAGE), pageid);
+        printf(D_HASP_INVALID_PAGE, pageid);
         return;
     }
 
-    LOG_DEBUG(TAG_HASP, F("%s - %d"), __FILE__, __LINE__);
+    printf("%s - %d", __FILE__, __LINE__);
 
     if(_pagenames[pageid]) {
         hasp_free(_pagenames[pageid]);
         _pagenames[pageid] = NULL;
     }
 
-    LOG_DEBUG(TAG_HASP, F("%s - %d"), __FILE__, __LINE__);
+    printf("%s - %d", __FILE__, __LINE__);
     if(!name) return;
     size_t size = strlen(name) + 1;
 
-    LOG_DEBUG(TAG_HASP, F("%s - %d"), __FILE__, __LINE__);
+    printf("%s - %d", __FILE__, __LINE__);
     if(size > 1) {
         _pagenames[pageid] = (char*)hasp_calloc(sizeof(char), size);
-        LOG_DEBUG(TAG_HASP, F("%s - %d"), __FILE__, __LINE__);
+        printf("%s - %d", __FILE__, __LINE__);
         if(_pagenames[pageid] == NULL) return;
         strncpy(_pagenames[pageid], name, size);
-        LOG_VERBOSE(TAG_HASP, F("%s"), _pagenames[pageid]);
+        printf("%s", _pagenames[pageid]);
     }
-    LOG_DEBUG(TAG_HASP, F("%s - %d"), __FILE__, __LINE__);
+    printf("%s - %d", __FILE__, __LINE__);
 }
 
 void Page::next(lv_scr_load_anim_t anim_type, uint32_t time, uint32_t delay)
@@ -211,26 +211,26 @@ void Page::load_jsonl(const char* pagesfile)
     if(pagesfile[0] == '\0') return;
 
     if(!filesystemSetup()) {
-        LOG_ERROR(TAG_HASP, F("FS not mounted. " D_FILE_LOAD_FAILED), pagesfile);
+        printf("FS not mounted. " D_FILE_LOAD_FAILED, pagesfile);
         return;
     }
 
     if(!HASP_FS.exists(pagesfile)) {
-        LOG_WARNING(TAG_HASP, F(D_FILE_NOT_FOUND ": %s"), pagesfile);
+        printf(D_FILE_NOT_FOUND ": %s", pagesfile);
         return;
     }
 
-    LOG_TRACE(TAG_HASP, F(D_FILE_LOADING), pagesfile);
+    printf(D_FILE_LOADING, pagesfile);
 
     File file = HASP_FS.open(pagesfile, "r");
     if(!file) {
-        LOG_ERROR(TAG_HASP, F(D_FILE_LOAD_FAILED), pagesfile);
+        printf(D_FILE_LOAD_FAILED, pagesfile);
         return;
     }
     dispatch_parse_jsonl(file, savedPage);
     file.close();
 
-    LOG_INFO(TAG_HASP, F(D_FILE_LOADED), pagesfile);
+    printf(D_FILE_LOADED, pagesfile);
 
 #elif HASP_USE_EEPROM > 0
     LOG_TRACE(TAG_HASP, F("Loading jsonl from EEPROM..."));

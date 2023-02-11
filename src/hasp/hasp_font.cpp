@@ -61,11 +61,11 @@ void font_setup()
 
 #if defined(ARDUINO_ARCH_ESP32)
     if(lv_freetype_init(LVGL_FREETYPE_MAX_FACES, LVGL_FREETYPE_MAX_SIZES, LVGL_FREETYPE_MAX_BYTES)) {
-        LOG_VERBOSE(TAG_FONT, F("FreeType v%d.%d.%d " D_SERVICE_STARTED " = %d"), FREETYPE_MAJOR, FREETYPE_MINOR,
-                    FREETYPE_PATCH, hasp_use_psram());
-        LOG_DEBUG(TAG_FONT, F("FreeType High Watermark %u"), lv_ft_freetype_high_watermark());
+        printf("FreeType v%d.%d.%d " D_SERVICE_STARTED " = %d", FREETYPE_MAJOR, FREETYPE_MINOR,
+                    FREETYPE_PATCH);
+        printf("FreeType High Watermark %u", lv_ft_freetype_high_watermark());
     } else {
-        LOG_ERROR(TAG_FONT, F("FreeType " D_SERVICE_START_FAILED));
+        printf("FreeType " D_SERVICE_START_FAILED);
     }
 #elif defined(WINDOWS) || defined(POSIX)
 #else
@@ -103,7 +103,7 @@ static void font_release(void* node)
 
     /* Free the allocated font_name last */
     if(font_p->payload) {
-        LOG_DEBUG(TAG_FONT, F("Released font %s"), font_p->payload);
+        printf("Released font %s", font_p->payload);
         hasp_free(font_p->payload);
     }
 }
@@ -146,7 +146,7 @@ static lv_font_t* font_find_in_list(const char* payload)
     hasp_font_info_t* font_p = (hasp_font_info_t*)_lv_ll_get_head(&hasp_fonts_ll);
     while(font_p) {
         if(strcmp(font_p->payload, payload) == 0) { // name and size
-            LOG_DEBUG(TAG_FONT, F("Payload %s found => line height = %d - base_line = %d"), payload,
+            printf("Payload %s found => line height = %d - base_line = %d", payload,
                       font_p->font->line_height, font_p->font->base_line);
             return font_p->font;
         }
@@ -186,11 +186,11 @@ static lv_font_t* font_add_to_list(const char* payload)
                 lv_fs_res_t res;
                 res = lv_fs_open(&f, filename, LV_FS_MODE_RD);
                 if(res != LV_FS_RES_OK) {
-                    LOG_VERBOSE(TAG_FONT, F(D_FILE_NOT_FOUND ": %s"), filename);
+                    printf(D_FILE_NOT_FOUND ": %s", filename);
                     continue;
                 } else {
                     lv_fs_close(&f);
-                    LOG_VERBOSE(TAG_FONT, F(D_FILE_LOADING), filename);
+                    printf(D_FILE_LOADING, filename);
                 }
 
                 lv_ft_info_t info;
@@ -199,7 +199,7 @@ static lv_font_t* font_add_to_list(const char* payload)
                 info.mem      = NULL;
                 info.mem_size = 0;
                 info.style    = FT_FONT_STYLE_NORMAL;
-                LOG_VERBOSE(TAG_FONT, F("Loading font %s size %d"), filename, size);
+                printf("Loading font %s size %d", filename, size);
                 if(lv_ft_font_init(&info)) {
                     font      = info.font;
                     font_type = 1;
@@ -219,7 +219,7 @@ static lv_font_t* font_add_to_list(const char* payload)
             info.mem      = (const void*)OPENHASP_TTF_START;
             info.mem_size = OPENHASP_TTF_END - OPENHASP_TTF_START;
             info.style    = FT_FONT_STYLE_NORMAL;
-            LOG_VERBOSE(TAG_FONT, F("Loading font %s size %d"), filename, size);
+            printf("Loading font %s size %d", filename, size);
             if(lv_ft_font_init(&info)) {
                 font      = info.font;
                 font_type = 2; // Flash embedded TTF
@@ -231,7 +231,7 @@ static lv_font_t* font_add_to_list(const char* payload)
 #endif // ESP32 && HASP_USE_FREETYPE
 
     if(!font) return NULL;
-    LOG_VERBOSE(TAG_FONT, F("Loaded font %s line_height %d"), filename, font->line_height);
+    printf("Loaded font %s line_height %d", filename, font->line_height);
 
     /* alloc payload str */
     size_t len = strlen(payload);
@@ -253,7 +253,7 @@ static lv_font_t* font_add_to_list(const char* payload)
 lv_font_t* get_font(const char* payload)
 {
 #if HASP_USE_FREETYPE > 0
-    LOG_DEBUG(TAG_FONT, F("FreeType High Watermark %u"), lv_ft_freetype_high_watermark());
+    printf("FreeType High Watermark %u", lv_ft_freetype_high_watermark());
 #endif
 
     lv_font_t* font = font_find_in_list(payload);

@@ -5,7 +5,7 @@
 #define HASP_DEBUG_H
 
 #ifdef ARDUINO
-#include "ArduinoLog.h"
+//#include "ArduinoLog.h"
 #endif
 
 #include "hasp_conf.h"

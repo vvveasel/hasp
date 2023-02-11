@@ -9,14 +9,14 @@
 bool nvs_user_begin(Preferences& preferences, const char* key, bool readonly)
 {
     if(preferences.begin(key, false, "config")) {
-        LOG_DEBUG(TAG_NVS, "config partition opened");
+        printf("config partition opened");
         return true;
     }
     if(preferences.begin(key, false)) {
-        LOG_WARNING(TAG_NVS, "config partition not found");
+        printf("config partition not found");
         return true;
     }
-    LOG_ERROR(TAG_NVS, "Failed to open partition");
+    printf("Failed to open partition");
     return false;
 }
 
@@ -46,7 +46,7 @@ bool nvsUpdateString(Preferences& preferences, const char* key, JsonVariant valu
             changed = true; // Nvs key doesnot exist, create it
         if(changed) {
             size_t len = preferences.putString(key, val);
-            LOG_DEBUG(TAG_NVS, F(D_BULLET "Wrote %s => %s (%d bytes)"), key, val, len);
+            printf(D_BULLET "Wrote %s => %s (%d bytes)", key, val, len);
         }
     }
 
@@ -65,7 +65,7 @@ bool nvsUpdateUInt(Preferences& preferences, const char* key, JsonVariant value)
             changed = true; // Nvs key doesnot exist, create it
         if(changed) {
             size_t len = preferences.putUInt(key, val);
-            LOG_DEBUG(TAG_TIME, F(D_BULLET "Wrote %s => %d"), key, val);
+            printf(D_BULLET "Wrote %s => %d", key, val);
         }
     }
 
@@ -84,7 +84,7 @@ bool nvsUpdateUShort(Preferences& preferences, const char* key, JsonVariant valu
             changed = true; // Nvs key doesnot exist, create it
         if(changed) {
             size_t len = preferences.putUShort(key, val);
-            LOG_DEBUG(TAG_TIME, F(D_BULLET "Wrote %s => %d"), key, val);
+            printf(D_BULLET "Wrote %s => %d", key, val);
         }
     }
 
@@ -226,14 +226,14 @@ void nvs_setup()
 
         for(int i = 0; i < 6; i++) {
             if(oldPrefs.begin(name[i], false) && newPrefs.begin(name[i], false, "config")) {
-                LOG_INFO(TAG_NVS, "opened %s", name[i]);
+                printf("opened %s", name[i]);
                 String password = oldPrefs.getString(FP_CONFIG_PASS, D_PASSWORD_MASK);
                 if(password != D_PASSWORD_MASK) {
-                    LOG_INFO(TAG_NVS, "found %s %s => %s", name[i], D_PASSWORD_MASK, password.c_str());
+                    printf("found %s %s => %s", name[i], D_PASSWORD_MASK, password.c_str());
                     size_t len = newPrefs.putString(FP_CONFIG_PASS, password);
                     if(len == password.length()) {
                         oldPrefs.remove(FP_CONFIG_PASS);
-                        LOG_INFO(TAG_NVS, "Moved %s key %s to new NVS partition", name[i], FP_CONFIG_PASS);
+                        printf("Moved %s key %s to new NVS partition", name[i], FP_CONFIG_PASS);
                     }
                 }
             }

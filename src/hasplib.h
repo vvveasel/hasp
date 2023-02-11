@@ -3,8 +3,8 @@
    For full license information read the LICENSE file in the project folder */
 
 #ifdef ARDUINO
-#include <Arduino.h>
-#include "ArduinoLog.h"
+//#include <Arduino.h>
+//#include "ArduinoLog.h"
 #endif
 
 #ifdef USE_CONFIG_OVERRIDE

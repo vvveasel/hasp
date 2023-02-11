@@ -22,10 +22,10 @@
 
 #define FTP_SERVER_VERSION "2.1.5 (2023-01-13)"
 
-#include "ArduinoLog.h"
+//#include "ArduinoLog.h"
 
 #if ARDUINO >= 100
-#include "Arduino.h"
+//#include "Arduino.h"
 #else
 #include "WProgram.h"
 #endif
@@ -465,16 +465,6 @@
 #define OPEN_CLOSE_SPIFFS
 #define OPEN_CLOSE_SD
 
-// Setup debug printing macros.
-#ifdef FTP_SERVER_DEBUG
-	// #define DEBUG_PRINT(...) { DEBUG_PRINTER.print(__VA_ARGS__); }
-	// #define DEBUG_PRINTLN(...) { DEBUG_PRINTER.println(__VA_ARGS__); }
-	#define DEBUG_PRINT(...) { Log.verbose(68 /* FTP_TAG */, __VA_ARGS__); }
-	#define DEBUG_PRINTLN(...) { Log.verbose(68 /* FTP_TAG */, __VA_ARGS__); }
-#else
-	#define DEBUG_PRINT(...) {}
-	#define DEBUG_PRINTLN(...) {}
-#endif
 
 #define FTP_CMD_PORT 21           // Command port on wich server is listening
 #define FTP_DATA_PORT_DFLT 20     // Default data port in active mode

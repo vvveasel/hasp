@@ -59,16 +59,16 @@ void dispatch_state_subtopic(const char* subtopic, const char* payload)
 #if HASP_USE_MQTT > 0
     switch(mqtt_send_state(subtopic, payload)) {
         case MQTT_ERR_OK:
-            LOG_TRACE(TAG_MQTT_PUB, F("%s => %s"), subtopic, payload);
+            printf("%s => %s", subtopic, payload);
             break;
         case MQTT_ERR_PUB_FAIL:
-            LOG_ERROR(TAG_MQTT_PUB, F(D_MQTT_FAILED " %s => %s"), subtopic, payload);
+            printf(D_MQTT_FAILED " %s => %s", subtopic, payload);
             break;
         case MQTT_ERR_NO_CONN:
-            LOG_ERROR(TAG_MQTT, F(D_MQTT_NOT_CONNECTED " %s => %s"), subtopic, payload);
+            printf(D_MQTT_NOT_CONNECTED " %s => %s", subtopic, payload);
             break;
         default:
-            LOG_ERROR(TAG_MQTT, F(D_ERROR_UNKNOWN " %s => %s"), subtopic, payload);
+            printf(D_ERROR_UNKNOWN " %s => %s", subtopic, payload);
     }
 #endif
 
@@ -127,7 +127,7 @@ void dispatch_state_val(const char* topic, hasp_event_t eventid, int32_t val)
 
 void dispatch_json_error(uint8_t tag, DeserializationError& jsonError)
 {
-    LOG_ERROR(tag, F(D_JSON_FAILED " %d"), jsonError);
+    printf(D_JSON_FAILED " %d", jsonError);
     // const char * error = jsonError.c_str();
     // LOG_ERROR(tag, F(D_JSON_FAILED " %s"), error);
 }
@@ -187,7 +187,7 @@ static void dispatch_input(const char* topic, const char* payload)
 #if HASP_USE_GPIO > 0
 
     if(!Parser::is_only_digits(topic)) {
-        LOG_WARNING(TAG_MSGR, F("Invalid pin %s"), topic);
+        printf("Invalid pin %s", topic);
         return;
     }
 
@@ -195,7 +195,7 @@ static void dispatch_input(const char* topic, const char* payload)
     uint8_t pin = atoi(topic);
     if(gpio_input_pin_state(pin)) return;
 
-    LOG_WARNING(TAG_GPIO, F(D_BULLET "Pin %d is not configured"), pin);
+    printf(D_BULLET "Pin %d is not configured", pin);
 
 #endif
 }
@@ -205,7 +205,7 @@ static void dispatch_output(const char* topic, const char* payload)
 #if HASP_USE_GPIO > 0
 
     if(!Parser::is_only_digits(topic)) {
-        LOG_WARNING(TAG_MSGR, F("Invalid pin %s"), topic);
+        printf("Invalid pin %s", topic);
         return;
     }
 
@@ -228,7 +228,7 @@ static void dispatch_output(const char* topic, const char* payload)
             bool updated = false;
 
             if(!gpio_get_pin_state(pin, power_state, state_value)) {
-                LOG_WARNING(TAG_GPIO, F(D_BULLET "Pin %d can not be set"), pin);
+                printf(D_BULLET "Pin %d can not be set", pin);
                 return;
             }
 
@@ -261,7 +261,7 @@ static void dispatch_output(const char* topic, const char* payload)
 
     // just output this pin
     if(!gpio_output_pin_state(pin)) {
-        LOG_WARNING(TAG_GPIO, F(D_BULLET "Pin %d is not configured"), pin);
+        printf(D_BULLET "Pin %d is not configured", pin);
     }
 
 #endif
@@ -321,7 +321,7 @@ static void dispatch_command(const char* topic, const char* payload, bool update
         if(strlen(payload) == 0) {
             //    dispatch_simple_text_command(topic); // Could cause an infinite loop!
         }
-        LOG_WARNING(TAG_MSGR, F(D_DISPATCH_COMMAND_NOT_FOUND " => %s"), topic, payload);
+        printf(D_DISPATCH_COMMAND_NOT_FOUND " => %s", topic, payload);
     }
 }
 
@@ -377,11 +377,11 @@ static void dispatch_simple_text_command(const char* cmnd, uint8_t source)
 
                 // topic is before '=', payload is after '=' position
                 update |= strlen(cmnd + pos + 1) > 0; // equal sign OR space with payload
-                LOG_TRACE(TAG_MSGR, update ? F("%s=%s") : F("%s%s"), topic, cmnd + pos + 1);
+                printf((update ? "%s=%s" : "%s%s"), topic, cmnd + pos + 1);
                 dispatch_topic_payload(topic, cmnd + pos + 1, update, source);
             } else {
                 char empty_payload[1] = {0};
-                LOG_TRACE(TAG_MSGR, cmnd);
+                printf(cmnd);
                 dispatch_topic_payload(cmnd, empty_payload, false, source);
             }
         }
@@ -570,7 +570,7 @@ void dispatch_normalized_group_values(hasp_update_value_t& value)
 #endif
     object_set_normalized_group_values(value); // Update onsreen objects except originating obj
 
-    LOG_VERBOSE(TAG_MSGR, F("GROUP %d value %d (%d-%d)"), value.group, value.val, value.min, value.max);
+    printf("GROUP %d value %d (%d-%d)", value.group, value.val, value.min, value.max);
 #if HASP_USE_GPIO > 0
     gpio_output_group_values(value.group); // Output new gpio values
 #endif
@@ -587,7 +587,7 @@ void dispatch_screenshot(const char*, const char* filename, uint8_t source)
         memcpy_P(tempfile, PSTR("/screenshot.bmp"), sizeof(tempfile));
         guiTakeScreenshot(tempfile);
     } else if(strlen(filename) > 31 || filename[0] != '/') { // Invalid filename
-        LOG_WARNING(TAG_MSGR, F("D_FILE_SAVE_FAILED"), filename);
+        printf("D_FILE_SAVE_FAILED", filename);
     } else { // Valid filename
         guiTakeScreenshot(filename);
     }
@@ -600,25 +600,25 @@ void dispatch_screenshot(const char*, const char* filename, uint8_t source)
 bool dispatch_json_variant(JsonVariant& json, uint8_t& savedPage, uint8_t source)
 {
     if(json.is<JsonArray>()) { // handle json as an array of commands
-        LOG_WARNING(TAG_MSGR, "TEXT = ARRAY");
+        printf("TEXT = ARRAY");
         for(JsonVariant command : json.as<JsonArray>()) {
             dispatch_json_variant(command, savedPage, source);
         }
 
     } else if(json.is<JsonObject>()) { // handle json as a jsonl
-        LOG_WARNING(TAG_MSGR, "TEXT = OBJECT");
+        printf("TEXT = OBJECT");
         hasp_new_object(json.as<JsonObject>(), savedPage);
 
     } else if(json.is<std::string>()) { // handle json as a single command
-        LOG_WARNING(TAG_MSGR, "TEXT = %s", json.as<std::string>().c_str());
+        printf("TEXT = %s", json.as<std::string>().c_str());
         dispatch_simple_text_command(json.as<std::string>().c_str(), source);
 
     } else if(json.is<const char*>()) { // handle json as a single command
-        LOG_WARNING(TAG_MSGR, "TEXT = %s", json.as<const char*>());
+        printf("TEXT = %s", json.as<const char*>());
         dispatch_simple_text_command(json.as<const char*>(), source);
 
     } else {
-        LOG_WARNING(TAG_MSGR, "TEXT = unknown type");
+        printf("TEXT = unknown type");
         return false;
     }
     return true;
@@ -644,7 +644,7 @@ void dispatch_text_line(const char* payload, uint8_t source)
             JsonVariant json  = doc.as<JsonVariant>();
             uint8_t savedPage = haspPages.get();
             if(!dispatch_json_variant(json, savedPage, source)) {
-                LOG_WARNING(TAG_MSGR, F(D_DISPATCH_COMMAND_NOT_FOUND), payload);
+                printf(D_DISPATCH_COMMAND_NOT_FOUND, payload);
                 // dispatch_simple_text_command(payload, source);
             }
 
@@ -672,7 +672,7 @@ void dispatch_parse_json(const char*, const char* payload, uint8_t source)
     JsonVariant json  = doc.as<JsonVariant>();
     uint8_t savedPage = haspPages.get();
     if(!dispatch_json_variant(json, savedPage, TAG_EVENT)) {
-        LOG_WARNING(TAG_MSGR, F(D_DISPATCH_COMMAND_NOT_FOUND), "");
+        printf(D_DISPATCH_COMMAND_NOT_FOUND, "");
     }
 }
 
@@ -709,10 +709,10 @@ void dispatch_parse_jsonl(std::istream& stream, uint8_t& saved_page_id)
 
     /* For debugging purposes */
     if(jsonError == DeserializationError::EmptyInput) {
-        LOG_DEBUG(TAG_MSGR, F(D_JSONL_SUCCEEDED));
+        printf(D_JSONL_SUCCEEDED);
 
     } else {
-        LOG_ERROR(TAG_MSGR, F(D_JSONL_FAILED ": %s"), line, jsonError.c_str());
+        printf(D_JSONL_FAILED ": %s", line, jsonError.c_str());
     }
 
     saved_jsonl_page = saved_page_id;
@@ -740,15 +740,15 @@ void dispatch_run_script(const char*, const char* payload, uint8_t source)
 #if HASP_USE_SPIFFS > 0 || HASP_USE_LITTLEFS > 0
 
     if(!HASP_FS.exists(filename)) {
-        LOG_WARNING(TAG_MSGR, F(D_FILE_NOT_FOUND ": %s"), payload);
+        printf(D_FILE_NOT_FOUND ": %s", payload);
         return;
     }
 
-    LOG_TRACE(TAG_MSGR, F(D_FILE_LOADING), payload);
+    printf(D_FILE_LOADING, payload);
 
     File cmdfile = HASP_FS.open(filename, "r");
     if(!cmdfile) {
-        LOG_ERROR(TAG_MSGR, F(D_FILE_LOAD_FAILED), payload);
+        printf(D_FILE_LOAD_FAILED, payload);
         return;
     }
 
@@ -776,7 +776,7 @@ void dispatch_run_script(const char*, const char* payload, uint8_t source)
     }
 
     cmdfile.close();
-    LOG_INFO(TAG_MSGR, F(D_FILE_LOADED), payload);
+    printf(D_FILE_LOADED, payload);
 #else
     LOG_ERROR(TAG_MSGR, F(D_FILE_LOAD_FAILED), payload);
 #endif
@@ -970,7 +970,7 @@ void dispatch_moodlight(const char* topic, const char* payload, uint8_t source)
 
 void dispatch_backlight_obsolete(const char* topic, const char* payload, uint8_t source)
 {
-    LOG_WARNING(TAG_MSGR, F(D_ATTRIBUTE_OBSOLETE D_ATTRIBUTE_INSTEAD), topic,
+    printf(D_ATTRIBUTE_OBSOLETE D_ATTRIBUTE_INSTEAD, topic,
                 "backlight"); // TODO: obsolete dim, light and brightness
     dispatch_backlight(topic, payload, source);
 }
@@ -1041,7 +1041,7 @@ void dispatch_backlight(const char*, const char* payload, uint8_t source)
 void dispatch_web_update(const char*, const char* espOtaUrl, uint8_t source)
 {
 #if HASP_USE_HTTP_UPDATE > 0
-    LOG_TRACE(TAG_MSGR, F(D_OTA_CHECK_UPDATE), espOtaUrl);
+    printf(D_OTA_CHECK_UPDATE, espOtaUrl);
     ota_http_update(espOtaUrl);
 #endif
 }
@@ -1097,8 +1097,8 @@ void dispatch_reboot(bool saveConfig)
 #if HASP_USE_WIFI > 0 || HASP_USE_ETHERNET > 0
     networkStop();
 #endif
-    LOG_VERBOSE(TAG_MSGR, F("-------------------------------------"));
-    LOG_TRACE(TAG_MSGR, F(D_DISPATCH_REBOOT));
+    printf("-------------------------------------");
+    printf(D_DISPATCH_REBOOT);
 
 #if defined(WINDOWS) || defined(POSIX)
     fflush(stdout);
@@ -1160,16 +1160,16 @@ void dispatch_send_sensordata(const char*, const char*, uint8_t source)
 
     switch(mqtt_send_state(MQTT_TOPIC_SENSORS, data)) {
         case MQTT_ERR_OK:
-            LOG_TRACE(TAG_MQTT_PUB, F(MQTT_TOPIC_SENSORS " => %s"), data);
+            printf(MQTT_TOPIC_SENSORS " => %s", data);
             break;
         case MQTT_ERR_PUB_FAIL:
-            LOG_ERROR(TAG_MQTT_PUB, F(D_MQTT_FAILED " " MQTT_TOPIC_SENSORS " => %s"), data);
+            printf(D_MQTT_FAILED " " MQTT_TOPIC_SENSORS " => %s", data);
             break;
         case MQTT_ERR_NO_CONN:
-            LOG_ERROR(TAG_MQTT, F(D_MQTT_NOT_CONNECTED));
+            printf(D_MQTT_NOT_CONNECTED);
             break;
         default:
-            LOG_ERROR(TAG_MQTT, F(D_ERROR_UNKNOWN));
+            printf(D_ERROR_UNKNOWN);
     }
     dispatchSecondsToNextSensordata = dispatch_setings.teleperiod;
 
@@ -1181,7 +1181,7 @@ void dispatch_queue_discovery(const char*, const char*, uint8_t source)
     long seconds = HASP_RANDOM(10);
     if(dispatchSecondsToNextTeleperiod == seconds) seconds++;
     if(dispatchSecondsToNextSensordata == seconds) seconds++;
-    LOG_VERBOSE(TAG_MSGR, F("Discovery queued in %d seconds"), seconds);
+    printf("Discovery queued in %d seconds", seconds);
     dispatchSecondsToNextDiscovery = seconds;
 }
 
@@ -1221,16 +1221,16 @@ void dispatch_send_discovery(const char*, const char*, uint8_t source)
 
     switch(mqtt_send_discovery(data, len)) {
         case MQTT_ERR_OK:
-            LOG_TRACE(TAG_MQTT_PUB, F(MQTT_TOPIC_DISCOVERY " => %s"), data);
+            printf(MQTT_TOPIC_DISCOVERY " => %s", data);
             break;
         case MQTT_ERR_PUB_FAIL:
-            LOG_ERROR(TAG_MQTT_PUB, F(D_MQTT_FAILED " " MQTT_TOPIC_DISCOVERY " => %s"), data);
+            printf(D_MQTT_FAILED " " MQTT_TOPIC_DISCOVERY " => %s", data);
             break;
         case MQTT_ERR_NO_CONN:
-            LOG_ERROR(TAG_MQTT, F(D_MQTT_NOT_CONNECTED));
+            printf(D_MQTT_NOT_CONNECTED);
             break;
         default:
-            LOG_ERROR(TAG_MQTT, F(D_ERROR_UNKNOWN));
+            printf(D_ERROR_UNKNOWN);
     }
     dispatchSecondsToNextDiscovery = dispatch_setings.teleperiod * 2 + HASP_RANDOM(10);
 
@@ -1341,7 +1341,7 @@ void dispatch_wakeup()
 
 void dispatch_wakeup_obsolete(const char* topic, const char*, uint8_t source)
 {
-    LOG_WARNING(TAG_MSGR, F(D_ATTRIBUTE_OBSOLETE D_ATTRIBUTE_INSTEAD), topic,
+    printf(D_ATTRIBUTE_OBSOLETE D_ATTRIBUTE_INSTEAD, topic,
                 "idle=off"); // TODO: obsolete dim, light and brightness
     dispatch_wakeup();
     hasp_set_wakeup_touch(false);
@@ -1372,7 +1372,7 @@ void dispatch_idle(const char*, const char* payload, uint8_t source)
         } else if(!strcmp_P(payload, "long")) {
             hasp_set_sleep_state(HASP_SLEEP_LONG);
         } else {
-            LOG_WARNING(TAG_MSGR, F("Invalid idle value %s"), payload);
+            printf("Invalid idle value %s", payload);
             return;
         }
     }
@@ -1445,7 +1445,7 @@ void dispatch_service(const char*, const char* payload, uint8_t source)
 static void dispatch_add_command(const char* p_cmdstr, void (*func)(const char*, const char*, uint8_t))
 {
     if(nCommands >= sizeof(commands) / sizeof(haspCommand_t)) {
-        LOG_FATAL(TAG_MSGR, F("CMD_OVERFLOW %d"), nCommands); // Needs to be in curly braces
+        printf("CMD_OVERFLOW %d", nCommands); // Needs to be in curly braces
     } else {
         commands[nCommands].p_cmdstr = p_cmdstr;
         commands[nCommands].func     = func;
@@ -1458,7 +1458,7 @@ void dispatchSetup()
     // In order of importance : commands are NOT case-sensitive
     // The command.func() call will receive the full topic and payload parameters!
 
-    LOG_TRACE(TAG_MSGR, F(D_SERVICE_STARTING));
+    printf(D_SERVICE_STARTING);
 
     /* WARNING: remember to expand the commands array when adding new commands */
     dispatch_add_command(PSTR("json"), dispatch_parse_json);
@@ -1500,7 +1500,7 @@ void dispatchSetup()
 #endif
     /* WARNING: remember to expand the commands array when adding new commands */
 
-    LOG_INFO(TAG_MSGR, F(D_SERVICE_STARTED));
+    printf(D_SERVICE_STARTED);
 }
 
 void dispatchLoop()

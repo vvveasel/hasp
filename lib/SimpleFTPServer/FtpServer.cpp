@@ -64,8 +64,8 @@ FtpServer::FtpServer( uint16_t _cmdPort, uint16_t _pasvPort )
 void FtpServer::begin( const char * _user, const char * _pass, const char * _welcomeMessage )
 {
 	if ( strcmp( _user, "anonymous" ) != 0) {
-		DEBUG_PRINTLN(F("NOT ANONYMOUS"));
-		DEBUG_PRINTLN(_user);
+		printf("NOT ANONYMOUS");
+		printf(_user);
 		this->anonymousConnection = false; // needed to reset after end of anonymnous and begin of not anonymous
 	} else {
     this->anonymousConnection = true; 
@@ -117,7 +117,7 @@ void FtpServer::end()
     dataServer.end();
 #endif
 
-    DEBUG_PRINTLN(F("Stop server!"));
+    printf("Stop server!");
 
     if (FtpServer::_callback) {
   	  FtpServer::_callback(FTP_DISCONNECT, free(), capacity());
@@ -174,7 +174,7 @@ uint8_t FtpServer::handleFTP() {
 		} else if (cmdStage == FTP_Init)  {  // Ftp server waiting for connection
 			abortTransfer();
 			iniVariables();
-			DEBUG_PRINT(F("Server waiting for connection on port %d"),cmdPort);
+			printf("Server waiting for connection on port %d",cmdPort);
 			// DEBUG_PRINTLN(cmdPort);
 
 			cmdStage = FTP_Client;
@@ -210,7 +210,7 @@ uint8_t FtpServer::handleFTP() {
 #else
 			if (client && !client.connected()) {
 				client.stop();
-				DEBUG_PRINTLN(F("CLIENT STOP!!"));
+				printf("CLIENT STOP!!");
 			}
 			client = ftpServer.accept();
 #endif
@@ -339,13 +339,13 @@ bool FtpServer::processCommand()
   //
   if( CommandIs( "USER" ))
   {
-	  DEBUG_PRINT(F("USER: %s"),parameter);
+	  printf("USER: %s",parameter);
 	  // DEBUG_PRINT(parameter);
 	  // DEBUG_PRINT(F(" "));
 	  // DEBUG_PRINTLN(user)
 
 	if (this->anonymousConnection &&  ! strcmp( parameter, user )) {
-    	DEBUG_PRINTLN( F("Anonymous authentication Ok. Waiting for commands.") );
+    	printf( "Anonymous authentication Ok. Waiting for commands." );
 
       client.println(F("230 Ok") );
       cmdStage = FTP_Cmd;
@@ -373,7 +373,7 @@ bool FtpServer::processCommand()
     }
     if( ! strcmp( parameter, pass ))
     {
-    	DEBUG_PRINTLN( F("Authentication Ok. Waiting for commands.") );
+    	printf( "Authentication Ok. Waiting for commands." );
 
       client.println(F("230 Ok") );
       cmdStage = FTP_Cmd;
@@ -524,7 +524,7 @@ bool FtpServer::processCommand()
 
     dataPort = pasvPort;
     // DEBUG_PRINTLN( F(" Connection management set to passive") );
-    DEBUG_PRINT( F("Listening at %s:%d"),dataIp.toString().c_str(),dataPort );
+    printf( "Listening at %s:%d",dataIp.toString().c_str(),dataPort );
     // DEBUG_PRINT( int( dataIp[0]) ); DEBUG_PRINT( F(".") ); DEBUG_PRINT( int( dataIp[1]) ); DEBUG_PRINT( F(".") );
     // DEBUG_PRINT( int( dataIp[2]) ); DEBUG_PRINT( F(".") ); DEBUG_PRINT( int( dataIp[3]) );
     // DEBUG_PRINT( F(":") ); DEBUG_PRINTLN( dataPort );
@@ -561,7 +561,7 @@ bool FtpServer::processCommand()
     	// DEBUG_PRINT( F(".") ); DEBUG_PRINT( int( dataIp[2]) ); DEBUG_PRINT( F(".") ); DEBUG_PRINTLN( int( dataIp[3]) );
     	// DEBUG_PRINT( F(" Data port set to ") ); DEBUG_PRINTLN( dataPort );
 
-    	DEBUG_PRINT( F("Remote endpoint %s:%d"), dataIp.toString().c_str(), dataPort );
+    	printf("Remote endpoint %s:%d", dataIp.toString().c_str(), dataPort );
 
 
       client.println(F("200 PORT command successful") );
@@ -650,7 +650,7 @@ bool FtpServer::processCommand()
           transferStage = FTP_Mlsd;
       }
       else {
-    	  DEBUG_PRINT("List Data stop!!");
+    	  printf("List Data stop!!");
     	  data.stop();
       }
     }
@@ -702,7 +702,7 @@ bool FtpServer::processCommand()
       // DEBUG_PRINTLN(F("200 OK, UTF8 ON") );
     } else {
       client.println(F("504 Unknow OPTS") );
-      DEBUG_PRINTLN(F("504 Unknow OPTS") );
+      printf("504 Unknow OPTS");
     }
   }
   //
@@ -761,10 +761,10 @@ bool FtpServer::processCommand()
     {
       bool open;
       if( exists( path )) {
-    	  DEBUG_PRINTLN(F("APPEND FILE!!"));
+    	  printf("APPEND FILE!!");
         open = openFile( path, ( CommandIs( "APPE" ) ? FTP_FILE_WRITE_APPEND : FTP_FILE_WRITE_CREATE ));
       } else {
-    	  DEBUG_PRINTLN(F("CREATE FILE!!"));
+    	  printf("CREATE FILE!!");
         open = openFile( path, FTP_FILE_WRITE_CREATE );
       }
 
@@ -805,7 +805,7 @@ bool FtpServer::processCommand()
     	  client.print( F("521 \"") ); client.print( parameter ); client.println( F("\" directory already exists") );
       } else
       {
-    	  DEBUG_PRINT( F(" Creating directory %s"), parameter );
+    	  printf(" Creating directory %s", parameter );
 
 #if STORAGE_TYPE != STORAGE_SPIFFS
         if( makeDir( path )) {
@@ -828,7 +828,7 @@ bool FtpServer::processCommand()
     if( haveParameter() && makeExistsPath( path )) {
       if( removeDir( path ))
       {
-    	  DEBUG_PRINT( F(" Deleting %s"), path );
+    	  printf(" Deleting %s", path );
 
     	  client.print( F("250 \"") ); client.print( parameter ); client.println( F("\" deleted") );
       }
@@ -845,7 +845,8 @@ bool FtpServer::processCommand()
     rnfrName[ 0 ] = 0;
     if( haveParameter() && makeExistsPath( rnfrName ))
     {
-    	DEBUG_PRINT( F(" Ready for renaming ") ); DEBUG_PRINTLN( rnfrName );
+    	printf(" Ready for renaming "); 
+      printf( rnfrName );
 
       client.println(F("350 RNFR accepted - file exists, ready for destination") );
       rnfrCmd = true;
@@ -879,7 +880,10 @@ bool FtpServer::processCommand()
 //        	  client.print( F("550 \"") ); client.print( dirp ); client.println( F("\" is not directory") );
 //          } else
 //          {
-        	  DEBUG_PRINT( F(" Renaming ") ); DEBUG_PRINT( rnfrName ); DEBUG_PRINT( F(" to ") ); DEBUG_PRINTLN( path );
+        	  printf(" Renaming "); 
+            printf( rnfrName ); 
+            printf(" to "); 
+            printf( path );
 
             if( rename( rnfrName, path ))
               client.println(F("250 File successfully renamed or moved") );
@@ -1213,21 +1217,21 @@ void generateFileLine(FTP_CLIENT_NETWORK_CLASS* data, bool isDirectory, const ch
 		data->print( long( 4096 ) );
 		data->print( F("\t") );
 
-		DEBUG_PRINT( F("drwxrwsr-x\t2\t") );
-		DEBUG_PRINT( user );
-		DEBUG_PRINT( F("\t") );
+		printf("drwxrwsr-x\t2\t");
+		printf( user );
+		printf("\t");
 
 		// DEBUG_PRINT( long( 4096 ) );
-		DEBUG_PRINT( F("\t") );
+		printf("\t");
 
 		data->print(time);
-		DEBUG_PRINT(time);
+		printf(time);
 
 		data->print( F("\t") );
 		if (writeFilename) data->println( fn );
 
-		DEBUG_PRINT( F("\t") );
-		if (writeFilename) DEBUG_PRINTLN( fn );
+		printf("\t");
+		if (writeFilename) printf( fn );
 
 	} else {
 //			data.print( F("+r,s") );
@@ -1239,20 +1243,20 @@ void generateFileLine(FTP_CLIENT_NETWORK_CLASS* data, bool isDirectory, const ch
 		data->print( fz );
 		data->print( F("\t") );
 
-		DEBUG_PRINT( F("-rw-rw-r--\t1\t") );
-		DEBUG_PRINT( user );
-		DEBUG_PRINT( F("\t") );
+		printf("-rw-rw-r--\t1\t");
+		printf( user );
+		printf("\t");
 		// DEBUG_PRINT( fz );
-		DEBUG_PRINT( F("\t") );
+		printf("\t");
 
 		data->print(time);
-		DEBUG_PRINT(time);
+		printf(time);
 
 		data->print( F("\t") );
 		if (writeFilename) data->println( fn );
 
-		DEBUG_PRINT( F("\t") );
-		if (writeFilename) DEBUG_PRINTLN( fn );
+		printf("\t");
+		if (writeFilename) printf( fn );
 	}
 
 }
@@ -1492,7 +1496,7 @@ bool FtpServer::doMlsd()
 #if STORAGE_TYPE != STORAGE_SPIFFS && STORAGE_TYPE != STORAGE_LITTLEFS && STORAGE_TYPE != STORAGE_SEEED_SD
   dir.close();
 #endif
-  	DEBUG_PRINTLN(F("Not connected!!"));
+  	printf("Not connected!!");
     return false;
   }
  // DEBUG_PRINTLN(F("Connected!!"));
@@ -1615,7 +1619,7 @@ bool FtpServer::doMlsd()
 		data.print( F(";Size=") ); data.print( fz );
 		data.print( F("; ") ); data.println( fn );
 
-		DEBUG_PRINT( F("Type=%s;Modify=%s;Size=%d;%s"),fileDir.isDirectory() ? "dir" : "file",dtStr,fz,fn.c_str());
+		printf("Type=%s;Modify=%s;Size=%d;%s",fileDir.isDirectory() ? "dir" : "file",dtStr,fz,fn.c_str());
 
 		nbMatch ++;
 // RoSchmi: next line was commented
@@ -1755,7 +1759,7 @@ void FtpServer::abortTransfer()
     dir.close();
 #endif
     client.println(F("426 Transfer aborted") );
-    DEBUG_PRINTLN( F(" Transfer aborted!") );
+    printf(" Transfer aborted!");
 
     transferStage = FTP_Close;
   }
@@ -1969,7 +1973,7 @@ bool FtpServer::makePath( char * fullName, char * param )
 //  DEBUG_PRINTLN(utf8_strlen2(fullName));
 
   if (utf8_strlen(fullName)>=FILENAME_LENGTH) {
-      DEBUG_PRINT(F("utf8_strlen %d"),utf8_strlen(fullName));
+      printf("utf8_strlen %d",utf8_strlen(fullName));
       client.println(F("553 File name not allowed. Too long.") );
       return false;
   }
@@ -1998,7 +2002,7 @@ bool FtpServer::makeExistsPath( char * path, char * param )
 #if (STORAGE_TYPE == STORAGE_SPIFFS || STORAGE_TYPE == STORAGE_SD || STORAGE_TYPE == STORAGE_SD_MMC  || STORAGE_TYPE == STORAGE_SEEED_SD)
   if (strcmp(path, "/") == 0)  return true;
 #endif
-  DEBUG_PRINT("PATH %s %s",path,exists( path )?"found":"not found");
+  printf("PATH %s %s",path,exists( path )?"found":"not found");
   // DEBUG_PRINT(path)
   if( exists( path )) {
 	  // DEBUG_PRINTLN(" ...EXIST!")
@@ -2138,7 +2142,7 @@ uint32_t FtpServer::fileSize( FTP_FILE file ) {
 }
 #elif (STORAGE_TYPE == STORAGE_SPIFFS || STORAGE_TYPE == STORAGE_LITTLEFS || STORAGE_TYPE == STORAGE_FFAT )
   bool FtpServer::openFile( const char * path, const char * readType ) {
-  		DEBUG_PRINT(F("File to open %s"), path );
+  		printf("File to open %s", path );
   		// DEBUG_PRINT( path );
   		// DEBUG_PRINT(F(" readType ") );
   		// DEBUG_PRINTLN(readType);

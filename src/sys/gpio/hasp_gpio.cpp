@@ -104,7 +104,7 @@ void gpio_log_serial_dimmer(const char* command)
     char buffer[32];
     snprintf_P(buffer, sizeof(buffer), PSTR("Dimmer => %02x %02x %02x %02x"), command[0], command[1], command[2],
                command[3]);
-    LOG_VERBOSE(TAG_GPIO, buffer);
+    printf(buffer);
 }
 
 #ifdef ARDUINO
@@ -207,7 +207,7 @@ static void gpio_setup_pin(uint8_t index)
     hasp_gpio_config_t* gpio = &gpioConfig[index];
 
     if(gpioIsSystemPin(gpio->pin)) {
-        LOG_WARNING(TAG_GPIO, F("Invalid pin %d"), gpio->pin);
+        printf("Invalid pin %d", gpio->pin);
         return;
     }
 
@@ -285,7 +285,7 @@ static void gpio_setup_pin(uint8_t index)
                 ledcAttachPin(gpio->pin, pwm_channel);
                 gpio->channel = pwm_channel++;
             } else {
-                LOG_ERROR(TAG_GPIO, F("Too many PWM channels defined"));
+                printf("Too many PWM channels defined");
             }
 #endif
             break;
@@ -321,16 +321,16 @@ static void gpio_setup_pin(uint8_t index)
             return;
 
         default:
-            LOG_WARNING(TAG_GPIO, F("Invalid config -> pin %d - type: %d"), gpio->pin, gpio->type);
+            printf("Invalid config -> pin %d - type: %d", gpio->pin, gpio->type);
     }
-    LOG_VERBOSE(TAG_GPIO, F(D_BULLET "Configured pin %d"), gpio->pin);
+    printf(D_BULLET "Configured pin %d", gpio->pin);
 }
 
 void gpioSetup()
 {
-    LOG_TRACE(TAG_GPIO, F(D_SERVICE_STARTING));
+    printf(D_SERVICE_STARTING);
 #if defined(ARDUINO_ARCH_ESP32)
-    LOG_WARNING(TAG_GPIO, F("Reboot counter %d"), rtcRecordCounter++);
+    printf("Reboot counter %d", rtcRecordCounter++);
 #endif
 
     aceButtonSetup();
@@ -341,7 +341,7 @@ void gpioSetup()
     moodlight_t moodlight = {.brightness = 255};
     gpio_set_moodlight(moodlight);
 
-    LOG_INFO(TAG_GPIO, F(D_SERVICE_STARTED));
+    printf(D_SERVICE_STARTED);
 }
 
 void gpioLoop(void)
@@ -596,7 +596,7 @@ static bool gpio_set_output_value(hasp_gpio_config_t* gpio, bool power, uint16_t
             return gpio_set_serial_dimmer(gpio);
 
         default:
-            LOG_WARNING(TAG_GPIO, F(D_BULLET "Pin %d is not a valid output"), gpio->pin);
+            printf(D_BULLET "Pin %d is not a valid output", gpio->pin);
             return false; // not a valid output
     }
 }
@@ -608,7 +608,7 @@ static void gpio_set_normalized_value(hasp_gpio_config_t* gpio, hasp_update_valu
 
     if(value.min != 0 || value.max != gpio->max) { // do we need to recalculate?
         if(value.min == value.max) {
-            LOG_ERROR(TAG_GPIO, F("Invalid value range"));
+            printf("Invalid value range");
             return;
         }
 
@@ -673,12 +673,12 @@ bool gpio_set_pin_state(uint8_t pin, bool power, int32_t val)
     hasp_gpio_config_t* gpio = NULL;
 
     if(!gpio_get_pin_config(pin, &gpio) || !gpio) {
-        LOG_WARNING(TAG_GPIO, F(D_BULLET "Pin %d is not configured"), pin);
+        printf(D_BULLET "Pin %d is not configured", pin);
         return false;
     }
 
     if(!gpio_is_output(gpio)) {
-        LOG_WARNING(TAG_GPIO, F(D_BULLET "Pin %d can not be set"), pin);
+        printf(D_BULLET "Pin %d can not be set", pin);
         return false;
     }
 
@@ -696,7 +696,7 @@ bool gpio_set_pin_state(uint8_t pin, bool power, int32_t val)
         // update this gpio value only
         if(gpio_set_output_value(gpio, power, val)) {
             gpio_output_state(gpio);
-            LOG_VERBOSE(TAG_GPIO, F("No Group - Pin %d = %d"), gpio->pin, gpio->val);
+            printf("No Group - Pin %d = %d", gpio->pin, gpio->val);
         } else {
             return false;
         }
@@ -724,7 +724,7 @@ void gpio_set_moodlight(moodlight_t& moodlight)
     for(uint8_t i = 0; i < HASP_NUM_GPIO_CONFIG; i++) {
         switch(gpioConfig[i].type) {
             case hasp_gpio_type_t::LED_R... hasp_gpio_type_t::LED_W:
-                LOG_VERBOSE(TAG_GPIO, F(D_BULLET D_GPIO_PIN " %d => %d"), gpioConfig[i].pin, gpioConfig[i].val);
+                printf(D_BULLET D_GPIO_PIN " %d => %d", gpioConfig[i].pin, gpioConfig[i].val);
                 break;
         }
     }
@@ -746,7 +746,7 @@ bool gpioInUse(uint8_t pin)
 bool gpioIsSystemPin(uint8_t gpio)
 {
     if(haspDevice.is_system_pin(gpio)) {
-        LOG_DEBUG(TAG_GPIO, F(D_BULLET D_GPIO_PIN " %d => ESP"), gpio);
+        printf(D_BULLET D_GPIO_PIN " %d => ESP", gpio);
         return true;
     }
 
@@ -780,7 +780,7 @@ bool gpioSavePinConfig(uint8_t config_num, uint8_t pin, uint8_t type, uint8_t gr
         gpioConfig[config_num].group         = group;
         gpioConfig[config_num].gpio_function = pinfunc;
         gpioConfig[config_num].inverted      = inverted;
-        LOG_TRACE(TAG_GPIO, F("Saving Pin config #%d pin %d - type %d - group %d - func %d"), config_num, pin, type,
+        printf("Saving Pin config #%d pin %d - type %d - group %d - func %d", config_num, pin, type,
                   group, pinfunc);
         return true;
     }
@@ -946,7 +946,7 @@ bool gpioGetConfig(const JsonObject& settings)
         if(i < HASP_NUM_GPIO_CONFIG) {
             uint32_t cur_val = gpioConfig[i].pin | (gpioConfig[i].group << 8) | (gpioConfig[i].type << 16) |
                                (gpioConfig[i].gpio_function << 24) | (gpioConfig[i].inverted << 31);
-            LOG_INFO(TAG_GPIO, F("GPIO CONF: %d: %d <=> %d"), i, cur_val, v.as<uint32_t>());
+            printf("GPIO CONF: %d: %d <=> %d", i, cur_val, v.as<uint32_t>());
 
             if(cur_val != v.as<uint32_t>()) changed = true;
             v.set(cur_val);

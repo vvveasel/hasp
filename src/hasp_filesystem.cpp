@@ -3,7 +3,7 @@
 
 #ifdef ARDUINO
 //#include <Arduino.h>
-#include "ArduinoLog.h"
+//#include "ArduinoLog.h"
 #include "FS.h"
 #endif
 
@@ -26,7 +26,7 @@
 
 //#include <Arduino.h>
 #include "ArduinoJson.h"
-#include "ArduinoLog.h"
+//#include "ArduinoLog.h"
 
 #include "hasp_debug.h"
 #include "hasp_filesystem.h"
@@ -64,7 +64,7 @@ void filesystemUnzip(const char*, const char* filename, uint8_t source)
                 }
 
                 if(fh.filename_length >= 255) {
-                    LOG_WARNING(TAG_FILE, F("filename length too long %d"), fh.filename_length);
+                    printf("filename length too long %d", fh.filename_length);
                     zipfile.seek(fh.filename_length + fh.extra_length, SeekCur); // skip extra field
                     continue;
                     // } else {
@@ -76,14 +76,14 @@ void filesystemUnzip(const char*, const char* filename, uint8_t source)
 
                 len = zipfile.read((uint8_t*)&name[1], fh.filename_length);
                 if(len != fh.filename_length) {
-                    LOG_WARNING(TAG_FILE, F("filename read failed %d != %d"), fh.filename_length, len);
+                    printf("filename read failed %d != %d", fh.filename_length, len);
                     done = true;
                     continue;
                 }
                 zipfile.seek(fh.extra_length, SeekCur); // skip extra field
 
                 if(fh.compression_method != ZIP_NO_COMPRESSION) {
-                    LOG_WARNING(TAG_FILE, F("Compression is not supported %d"), fh.compression_method);
+                    printf("Compression is not supported %d", fh.compression_method);
                     zipfile.seek(fh.compressed_size, SeekCur); // skip compressed file
                 } else {
 
@@ -114,9 +114,9 @@ void filesystemUnzip(const char*, const char* filename, uint8_t source)
 
                         if(!done) {
                             Parser::format_bytes(fh.uncompressed_size, (char*)buffer, sizeof(buffer));
-                            LOG_VERBOSE(TAG_FILE, F(D_BULLET "%s (%s)"), name, buffer);
+                            printf(D_BULLET "%s (%s)", name, buffer);
                         } else {
-                            LOG_ERROR(TAG_FILE, F(D_FILE_SAVE_FAILED), name);
+                            printf(D_FILE_SAVE_FAILED, name);
                         }
 
                         f.close();
@@ -135,13 +135,13 @@ void filesystemUnzip(const char*, const char* filename, uint8_t source)
             default: {
                 char outputString[9];
                 itoa(head, outputString, 16);
-                LOG_WARNING(TAG_FILE, F("invalid %s"), outputString);
+                printf("invalid %s", outputString);
                 done = true;
             }
         }
     }
     zipfile.close();
-    LOG_VERBOSE(TAG_FILE, F("extracting %s complete"), filename);
+    printf("extracting %s complete", filename);
 }
 #endif
 
@@ -162,7 +162,7 @@ void filesystemInfo()
     Parser::format_bytes(HASP_FS.totalBytes(), total, sizeof(total));
 #endif
 
-    Log.verbose(TAG_FILE, "Partition size: used: %s / total: %s", used, total);
+    printf("Partition size: used: %s / total: %s", used, total);
 }
 
 void filesystemList()
@@ -199,14 +199,14 @@ void filesystemList()
 #if defined(ARDUINO_ARCH_ESP32)
 String filesystem_list(fs::FS& fs, const char* dirname, uint8_t levels)
 {
-    LOG_VERBOSE(TAG_FILE, "Listing directory: %s\n", dirname);
+    printf("Listing directory: %s\n", dirname);
     String data = "[";
 
     File root = fs.open(dirname);
     if(!root) {
-        LOG_WARNING(TAG_FILE, "Failed to open directory");
+        printf("Failed to open directory");
     } else if(!root.isDirectory()) {
-        LOG_WARNING(TAG_FILE, "Not a directory");
+        printf("Not a directory");
     } else {
         File file = root.openNextFile();
         while(file) {
@@ -244,15 +244,15 @@ static void filesystem_write_file(const char* filename, const char* data)
 {
     if(HASP_FS.exists(filename)) return;
 
-    LOG_TRACE(TAG_CONF, F(D_FILE_SAVING), filename);
+    printf(D_FILE_SAVING, filename);
     File file = HASP_FS.open(filename, "w");
 
     if(file) {
         file.print(data);
         file.close();
-        LOG_INFO(TAG_CONF, F(D_FILE_SAVED), filename);
+        printf(D_FILE_SAVED, filename);
     } else {
-        LOG_ERROR(TAG_FILE, D_FILE_SAVE_FAILED, filename);
+        printf(D_FILE_SAVE_FAILED, filename);
     }
 }
 

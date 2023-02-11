@@ -51,23 +51,23 @@ void my_btnmatrix_map_clear(lv_obj_t* obj)
     lv_btnmatrix_ext_t* ext = (lv_btnmatrix_ext_t*)lv_obj_get_ext_attr(obj);
     const char** map_p_tmp  = ext->map_p; // store current pointer
 
-    LOG_DEBUG(TAG_ATTR, "%s %d %x   btn_cnt: %d", __FILE__, __LINE__, map_p_tmp, ext->btn_cnt);
+    printf("%s %d %x   btn_cnt: %d", __FILE__, __LINE__, map_p_tmp, ext->btn_cnt);
 
     if(ext->map_p && (ext->btn_cnt > 0)) {
 
         // The map exists and is not the default lvgl map anymore
         if((map_p_tmp == NULL) || (btnmatrix_default_map == NULL) || (map_p_tmp == btnmatrix_default_map)) return;
 
-        LOG_DEBUG(TAG_ATTR, "%s %d %x", __FILE__, __LINE__,
+        printf("%s %d %x", __FILE__, __LINE__,
                   *map_p_tmp);                                          // label buffer reserved as a contiguous block
-        LOG_DEBUG(TAG_ATTR, "%s %d %x", __FILE__, __LINE__, map_p_tmp); // label pointer array block
+        printf("%s %d %x", __FILE__, __LINE__, map_p_tmp); // label pointer array block
         lv_btnmatrix_set_map(obj, btnmatrix_default_map);               // reset to default btnmap pointer
 
-        LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+        printf("%s %d", __FILE__, __LINE__);
         lv_mem_free(*map_p_tmp); // free label buffer reserved as a contiguous block
-        LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+        printf("%s %d", __FILE__, __LINE__);
         lv_mem_free(map_p_tmp); // free label pointer array block
-        LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+        printf("%s %d", __FILE__, __LINE__);
     }
 }
 
@@ -105,7 +105,7 @@ const char** my_map_create(const char* payload)
     size_t tot_len            = sizeof(char*) * (arr.size() + 1);
     const char** map_data_str = (const char**)lv_mem_alloc(tot_len);
     if(map_data_str == NULL) {
-        LOG_ERROR(TAG_ATTR, F("Out of memory while creating button map"));
+        printf("Out of memory while creating button map");
         return NULL;
     }
     memset(map_data_str, 0, tot_len);
@@ -116,28 +116,28 @@ const char** my_map_create(const char* payload)
         tot_len += strlen(btn.as<const char*>()) + 1;
     }
     tot_len++; // trailing '\0'
-    LOG_VERBOSE(TAG_ATTR, F("Array Size = %d, Map Length = %d"), arr.size(), tot_len);
+    printf("Array Size = %d, Map Length = %d", arr.size(), tot_len);
 
     char* buffer_addr = (char*)lv_mem_alloc(tot_len);
     if(buffer_addr == NULL) {
         lv_mem_free(map_data_str);
-        LOG_ERROR(TAG_ATTR, F("Out of memory while creating button map"));
+        printf("Out of memory while creating button map");
         return NULL;
     }
     memset(buffer_addr, 0, tot_len); // Important, last index needs to be 0 => empty string ""
 
     /* Point of no return, destroy & free the previous map */
-    LOG_DEBUG(TAG_ATTR, F("%s %d   map addr:  %x"), __FILE__, __LINE__, map_data_str);
+    printf("%s %d   map addr:  %x", __FILE__, __LINE__, map_data_str);
     // my_btnmatrix_map_clear(obj); // Free previous map
 
     // Fill buffer
     size_t index = 0;
     size_t pos   = 0;
-    LOG_DEBUG(TAG_ATTR, F("%s %d   lbl addr:  %x"), __FILE__, __LINE__, buffer_addr);
+    printf("%s %d   lbl addr:  %x", __FILE__, __LINE__, buffer_addr);
     for(JsonVariant btn : arr) {
         // size_t len = btn.as<String>().length() + 1;
         size_t len = strlen(btn.as<const char*>()) + 1;
-        LOG_VERBOSE(TAG_ATTR, F(D_BULLET "Adding button: %s (%d bytes) %x"), btn.as<const char*>(), len,
+        printf(D_BULLET "Adding button: %s (%d bytes) %x", btn.as<const char*>(), len,
                     buffer_addr + pos);
         // LOG_VERBOSE(TAG_ATTR, F(D_BULLET "Adding button: %s (%d bytes) %x"), btn.as<String>().c_str(), len,
         // buffer_addr + pos);
@@ -148,34 +148,34 @@ const char** my_map_create(const char* payload)
     }
     map_data_str[index] = buffer_addr + pos; // save pointer to the last \0 byte
 
-    LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+    printf("%s %d", __FILE__, __LINE__);
     return map_data_str;
 }
 
 static void my_btnmatrix_set_map(lv_obj_t* obj, const char* payload)
 {
-    LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+    printf("%s %d", __FILE__, __LINE__);
     const char** map = my_map_create(payload);
     if(!map) return;
 
-    LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+    printf("%s %d", __FILE__, __LINE__);
     my_btnmatrix_map_clear(obj); // Free previous map
-    LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+    printf("%s %d", __FILE__, __LINE__);
     lv_btnmatrix_set_map(obj, map);
-    LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+    printf("%s %d", __FILE__, __LINE__);
 }
 
 static void my_msgbox_set_map(lv_obj_t* obj, const char* payload)
 {
-    LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+    printf("%s %d", __FILE__, __LINE__);
     const char** map = my_map_create(payload);
     if(!map) return;
 
-    LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+    printf("%s %d", __FILE__, __LINE__);
     my_msgbox_map_clear(obj); // Free previous map
-    LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+    printf("%s %d", __FILE__, __LINE__);
     lv_msgbox_add_btns(obj, map);
-    LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+    printf("%s %d", __FILE__, __LINE__);
 }
 
 void my_line_clear_points(lv_obj_t* obj)
@@ -208,7 +208,7 @@ static bool my_line_set_points(lv_obj_t* obj, const char* payload)
 
     lv_point_t* point_arr = (lv_point_t*)lv_mem_alloc(tot_len);
     if(point_arr == NULL) {
-        LOG_ERROR(TAG_ATTR, F("Out of memory while creating line points"));
+        printf("Out of memory while creating line points");
         return false;
     }
     memset(point_arr, 0, tot_len);
@@ -219,7 +219,7 @@ static bool my_line_set_points(lv_obj_t* obj, const char* payload)
         if(point.size() == 2) {
             point_arr[index].x = point[0].as<int16_t>();
             point_arr[index].y = point[1].as<int16_t>();
-            LOG_VERBOSE(TAG_ATTR, F(D_BULLET "Adding point %d: %d,%d"), index, point_arr[index].x, point_arr[index].y);
+            printf(D_BULLET "Adding point %d: %d,%d", index, point_arr[index].x, point_arr[index].y);
             index++;
         }
     }
@@ -322,7 +322,7 @@ static void hasp_attribute_get_part_state_new(lv_obj_t* obj, const char* attr_in
     uint8_t state_num = index % 10;
     uint8_t part_num  = index - state_num;
 
-    LOG_DEBUG(TAG_ATTR, F("Parsed %s to %s with part %d and state %d"), attr_in, attr_out, part_num, state_num);
+    printf("Parsed %s to %s with part %d and state %d", attr_in, attr_out, part_num, state_num);
 
 #if(LV_SLIDER_PART_INDIC != LV_SWITCH_PART_INDIC) || (LV_SLIDER_PART_KNOB != LV_SWITCH_PART_KNOB) ||                   \
     (LV_SLIDER_PART_BG != LV_SWITCH_PART_BG) || (LV_SLIDER_PART_INDIC != LV_ARC_PART_INDIC) ||                         \
@@ -848,7 +848,7 @@ static hasp_attribute_type_t hasp_local_style_attr(lv_obj_t* obj, const char* at
         case ATTR_TEXT_FONT: {
             lv_font_t* font = haspPayloadToFont(payload);
             if(font) {
-                LOG_DEBUG(TAG_ATTR, "%s %d %x", __FILE__, __LINE__, font);
+                printf("%s %d %x", __FILE__, __LINE__, font);
                 uint8_t count = 3;
                 if(obj_check_type(obj, LV_HASP_ROLLER)) count = my_roller_get_visible_row_count(obj);
                 lv_obj_set_style_local_text_font(obj, part, state, font);
@@ -862,7 +862,7 @@ static hasp_attribute_type_t hasp_local_style_attr(lv_obj_t* obj, const char* at
                 };
 
             } else {
-                LOG_WARNING(TAG_ATTR, F("Unknown Font ID %s"), payload);
+                printf("Unknown Font ID %s", payload);
             }
             return HASP_ATTR_TYPE_METHOD_OK;
         }
@@ -993,7 +993,7 @@ static hasp_attribute_type_t hasp_local_style_attr(lv_obj_t* obj, const char* at
             if(font) {
                 lv_obj_set_style_local_value_font(obj, part, state, font);
             } else {
-                LOG_WARNING(TAG_ATTR, F("Unknown Font ID %s"), attr_p);
+                printf("Unknown Font ID %s", attr_p);
             }
             return HASP_ATTR_TYPE_METHOD_OK;
         }
@@ -1336,19 +1336,19 @@ static hasp_attribute_type_t special_attribute_src(lv_obj_t* obj, const char* pa
                 int dsc_len = sizeof(lv_img_dsc_t) + url_len;
 
                 if(buf_len <= 8) { // header could not fit
-                    LOG_ERROR(TAG_ATTR, "img data size is too small %d", buf_len);
+                    printf("img data size is too small %d", buf_len);
                     return HASP_ATTR_TYPE_STR;
                 }
 
                 Stream* stream = http.getStreamPtr();
                 if(!stream) {
-                    LOG_ERROR(TAG_ATTR, "failed to get http data stream");
+                    printf("failed to get http data stream");
                     return HASP_ATTR_TYPE_STR;
                 }
 
                 lv_img_dsc_t* img_dsc = (lv_img_dsc_t*)lv_mem_alloc(dsc_len);
                 if(!img_dsc) {
-                    LOG_ERROR(TAG_ATTR, "img header creation failed %d", dsc_len);
+                    printf("img header creation failed %d", dsc_len);
                     return HASP_ATTR_TYPE_STR;
                 }
                 char* url = ((char*)img_dsc) + sizeof(lv_img_dsc_t);
@@ -1357,12 +1357,12 @@ static hasp_attribute_type_t special_attribute_src(lv_obj_t* obj, const char* pa
                 uint8_t* img_buf_pos   = img_buf_start;
                 if(!img_buf_start) {
                     lv_mem_free(img_dsc); // destroy header too
-                    LOG_ERROR(TAG_ATTR, "img buffer creation failed %d", buf_len);
+                    printf("img buffer creation failed %d", buf_len);
                     return HASP_ATTR_TYPE_STR;
                 }
 
                 // LOG_VERBOSE(TAG_ATTR, "img buffers created of %d and %d bytes", dsc_len, buf_len);
-                LOG_VERBOSE(TAG_ATTR, "img Content-Type: %s", http.header((size_t)0).c_str());
+                printf("img Content-Type: %s", http.header((size_t)0).c_str());
 
                 // Initialize the buffers
                 memset(img_buf_start, 0, buf_len);           // empty data buffer
@@ -1387,7 +1387,7 @@ static hasp_attribute_type_t special_attribute_src(lv_obj_t* obj, const char* pa
 
                     if(!memcmp(png_magic, img_buf_pos, sizeof(png_magic))) {
                         // PNG image, keep all data and advance buffer
-                        LOG_VERBOSE(TAG_ATTR, D_BULLET "PNG HEADER: %d bytes read=%d buf_len=%d", c, read, buf_len);
+                        printf(D_BULLET "PNG HEADER: %d bytes read=%d buf_len=%d", c, read, buf_len);
                         img_buf_pos += c;
                         buf_len -= c;
                         read += c;
@@ -1399,7 +1399,7 @@ static hasp_attribute_type_t special_attribute_src(lv_obj_t* obj, const char* pa
                         img_dsc->header.h           = header->h;
                         img_dsc->header.cf          = header->cf;
 
-                        LOG_VERBOSE(TAG_ATTR, D_BULLET "BIN image: w=%d h=%d cf=%d len=%d", img_dsc->header.w,
+                        printf(D_BULLET "BIN image: w=%d h=%d cf=%d len=%d", img_dsc->header.w,
                                     img_dsc->header.h, img_dsc->header.cf, img_dsc->data_size);
                         img_buf_pos += sizeof(lv_img_header_t);
                         // shift remainder of 8 data-bytes to the start of the buffer
@@ -1411,7 +1411,7 @@ static hasp_attribute_type_t special_attribute_src(lv_obj_t* obj, const char* pa
                     // disconnected
                     hasp_free(img_buf_start);
                     lv_mem_free(img_dsc); // destroy header too
-                    LOG_ERROR(TAG_ATTR, "img header read failed %d", buf_len);
+                    printf("img header read failed %d", buf_len);
                     return HASP_ATTR_TYPE_STR;
                 }
 
@@ -1433,11 +1433,11 @@ static hasp_attribute_type_t special_attribute_src(lv_obj_t* obj, const char* pa
                 if(buf_len > 0) {
                     hasp_free(img_buf_start);
                     lv_mem_free(img_dsc); // destroy header too
-                    LOG_ERROR(TAG_ATTR, "img data read failed %d", buf_len);
+                    printf("img data read failed %d", buf_len);
                     return HASP_ATTR_TYPE_STR;
                 }
 
-                LOG_VERBOSE(TAG_ATTR, D_BULLET "HTTP TOTAL READ: %d bytes, %d buffered", read,
+                printf(D_BULLET "HTTP TOTAL READ: %d bytes, %d buffered", read,
                             img_buf_pos - img_buf_start);
 
                 if(total > 24 && !memcmp(png_magic, img_dsc->data, sizeof(png_magic))) {
@@ -1447,11 +1447,11 @@ static hasp_attribute_type_t special_attribute_src(lv_obj_t* obj, const char* pa
                     img_dsc->header.h           = img_buf_start[23] + (img_buf_start[22] << 8);
                     img_dsc->data_size          = img_buf_pos - img_buf_start; // end of buffer - start of buffer
                     img_dsc->header.cf          = LV_IMG_CF_RAW_ALPHA;
-                    LOG_VERBOSE(TAG_ATTR, D_BULLET "PNG image: w=%d h=%d cf=%d len=%d", img_dsc->header.w,
+                    printf(D_BULLET "PNG image: w=%d h=%d cf=%d len=%d", img_dsc->header.w,
                                 img_dsc->header.h, img_dsc->header.cf, img_dsc->data_size);
                 } else {
                     img_dsc->data_size = img_buf_pos - img_buf_start - sizeof(lv_img_header_t); // end buf - start buf
-                    LOG_VERBOSE(TAG_ATTR, D_BULLET "BIN image: w=%d h=%d cf=%d len=%d", img_dsc->header.w,
+                    printf(D_BULLET "BIN image: w=%d h=%d cf=%d len=%d", img_dsc->header.w,
                                 img_dsc->header.h, img_dsc->header.cf, img_dsc->data_size);
                 }
 
@@ -1460,7 +1460,7 @@ static hasp_attribute_type_t special_attribute_src(lv_obj_t* obj, const char* pa
                 // LOG_DEBUG(TAG_ATTR, "%s %d %x -> %x", __FILE__, __LINE__, img_buf_start, img_buf_start_pos);
 
             } else {
-                LOG_WARNING(TAG_ATTR, "HTTP result %d", httpCode);
+                printf("HTTP result %d", httpCode);
             }
             http.end();
 #endif // HASP_USE_NETWORK
@@ -1470,19 +1470,19 @@ static hasp_attribute_type_t special_attribute_src(lv_obj_t* obj, const char* pa
         const void* src = lv_img_get_src(obj);
         switch(lv_img_src_get_type(src)) {
             case LV_IMG_SRC_FILE:
-                LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+                printf("%s %d", __FILE__, __LINE__);
                 *text = (char*)lv_img_get_file_name(obj);
                 break;
             case LV_IMG_SRC_SYMBOL:
-                LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+                printf("%s %d", __FILE__, __LINE__);
                 *text = (char*)src + strlen(LV_SYMBOL_DUMMY);
                 break;
             case LV_IMG_SRC_VARIABLE:
-                LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+                printf("%s %d", __FILE__, __LINE__);
                 *text = (char*)src + sizeof(lv_img_dsc_t);
                 break;
             default:
-                LOG_DEBUG(TAG_ATTR, F("%s %d"), __FILE__, __LINE__);
+                printf("%s %d", __FILE__, __LINE__);
         }
     }
     return HASP_ATTR_TYPE_STR;
@@ -1667,15 +1667,15 @@ static hasp_attribute_type_t attribute_common_json(lv_obj_t* obj, uint16_t attr_
                     if(JsonObject keys = json.as<JsonObject>()) {
                         hasp_parse_json_attributes(obj, keys); // json is valid object, cast as a JsonObject
                     } else {
-                        LOG_DEBUG(TAG_ATTR, "%s %d", __FILE__, __LINE__);
+                        printf("%s %d", __FILE__, __LINE__);
                         jsonError = DeserializationError::InvalidInput;
                     }
                 } else {
-                    LOG_DEBUG(TAG_ATTR, "%s %d", __FILE__, __LINE__);
+                    printf("%s %d", __FILE__, __LINE__);
                     jsonError = DeserializationError::IncompleteInput;
                 }
             }
-            LOG_DEBUG(TAG_ATTR, "%s %d", __FILE__, __LINE__);
+            printf("%s %d", __FILE__, __LINE__);
 
             if(jsonError) { // Couldn't parse incoming JSON object
                 dispatch_json_error(TAG_ATTR, jsonError);
@@ -2028,7 +2028,7 @@ static hasp_attribute_type_t attribute_common_val(lv_obj_t* obj, int32_t& val, b
 
             if(update) {
                 if(val < -1 || val >= my_btnmatrix_get_count(obj)) {
-                    LOG_WARNING(TAG_ATTR, F("Invalid index %d"), val);
+                    printf("Invalid index %d", val);
                 } else {
                     lv_btnmatrix_clear_btn_ctrl_all(obj, LV_BTNMATRIX_CTRL_CHECK_STATE);
                     lv_btnmatrix_ext_t* ext = (lv_btnmatrix_ext_t*)lv_obj_get_ext_attr(obj);
@@ -2633,7 +2633,7 @@ void hasp_process_obj_attribute(lv_obj_t* obj, const char* attribute, const char
             break;
 
         case ATTR_TXT: // TODO: remove
-            LOG_WARNING(TAG_HASP, F(D_ATTRIBUTE_OBSOLETE D_ATTRIBUTE_INSTEAD), attribute, "text");
+            printf(D_ATTRIBUTE_OBSOLETE D_ATTRIBUTE_INSTEAD, attribute, "text");
         case ATTR_TEXT:
         case ATTR_TEMPLATE:
             ret = attribute_common_text(obj, attr_hash, payload, &text, update);
@@ -2746,10 +2746,10 @@ void hasp_process_obj_attribute(lv_obj_t* obj, const char* attribute, const char
             haspPages.get_id(obj, &pageid);
             if(update) {
                 haspPages.set_name(pageid, payload);
-                LOG_VERBOSE(TAG_HASP, F("%s %d"), haspPages.get_name(pageid), pageid);
+                printf("%s %d", haspPages.get_name(pageid), pageid);
             } else {
                 text = haspPages.get_name(pageid);
-                LOG_VERBOSE(TAG_HASP, F("%s %d"), haspPages.get_name(pageid), pageid);
+                printf("%s %d", haspPages.get_name(pageid), pageid);
             }
             ret = HASP_ATTR_TYPE_STR;
             break;
@@ -2826,35 +2826,35 @@ void hasp_process_obj_attribute(lv_obj_t* obj, const char* attribute, const char
     // Output the returned value or warning
     switch(ret) {
         case HASP_ATTR_TYPE_NOT_FOUND:
-            LOG_WARNING(TAG_ATTR, F(D_ATTRIBUTE_UNKNOWN " (%d)"), attribute, attr_hash);
+            printf(D_ATTRIBUTE_UNKNOWN " (%d)", attribute, attr_hash);
             break;
 
         case HASP_ATTR_TYPE_INT_READONLY:
-            LOG_WARNING(TAG_ATTR, F(D_ATTRIBUTE_READ_ONLY), attribute);
+            printf(D_ATTRIBUTE_READ_ONLY, attribute);
         case HASP_ATTR_TYPE_INT:
             attr_out_int(obj, attribute, val);
             break;
 
         case HASP_ATTR_TYPE_BOOL_READONLY:
-            LOG_WARNING(TAG_ATTR, F(D_ATTRIBUTE_READ_ONLY), attribute);
+            printf(D_ATTRIBUTE_READ_ONLY, attribute);
         case HASP_ATTR_TYPE_BOOL:
             attr_out_bool(obj, attribute, val);
             break;
 
         case HASP_ATTR_TYPE_STR_READONLY:
-            LOG_WARNING(TAG_ATTR, F(D_ATTRIBUTE_READ_ONLY), attribute);
+            printf(D_ATTRIBUTE_READ_ONLY, attribute);
         case HASP_ATTR_TYPE_STR:
             attr_out_str(obj, attribute, text);
             break;
 
         case HASP_ATTR_TYPE_JSON_READONLY:
-            LOG_WARNING(TAG_ATTR, F(D_ATTRIBUTE_READ_ONLY), attribute);
+            printf(D_ATTRIBUTE_READ_ONLY, attribute);
         case HASP_ATTR_TYPE_JSON:
             attr_out_json(obj, attribute, text);
             break;
 
         case HASP_ATTR_TYPE_COLOR_INVALID:
-            LOG_WARNING(TAG_ATTR, F(D_ATTRIBUTE_COLOR_INVALID), payload);
+            printf(D_ATTRIBUTE_COLOR_INVALID, payload);
             break;
 
         case HASP_ATTR_TYPE_COLOR:
@@ -2862,7 +2862,7 @@ void hasp_process_obj_attribute(lv_obj_t* obj, const char* attribute, const char
             break;
 
         case HASP_ATTR_TYPE_ALIGN_INVALID:
-            LOG_WARNING(TAG_ATTR, F(D_ATTRIBUTE_ALIGN_INVALID), payload);
+            printf(D_ATTRIBUTE_ALIGN_INVALID, payload);
             break;
 
         case HASP_ATTR_TYPE_ALIGN:
@@ -2872,11 +2872,11 @@ void hasp_process_obj_attribute(lv_obj_t* obj, const char* attribute, const char
             break;
 
         case HASP_ATTR_TYPE_METHOD_INVALID_FOR_PAGE:
-            LOG_ERROR(TAG_ATTR, F(D_ATTRIBUTE_PAGE_METHOD_INVALID), attribute);
+            printf(D_ATTRIBUTE_PAGE_METHOD_INVALID, attribute);
         case HASP_ATTR_TYPE_METHOD_OK:
             break;
 
         default:
-            LOG_ERROR(TAG_ATTR, F(D_ERROR_UNKNOWN " (%d)"), ret);
+            printf(D_ERROR_UNKNOWN " (%d)", ret);
     }
 }

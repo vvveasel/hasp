@@ -4,8 +4,8 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include <Arduino.h>
-#include "ArduinoLog.h"
+//#include <Arduino.h>
+//#include "ArduinoLog.h"
 #include "hasp_conf.h"
 #include "hasp_time.h"
 
@@ -47,8 +47,8 @@ void timeSetup()
     ntp2 = preferences.getString("ntp2", NTPSERVER2);
     ntp3 = preferences.getString("ntp3", NTPSERVER3);
 
-    LOG_VERBOSE(TAG_TIME, F("%s => %s"), zone.c_str(), mytz.c_str());
-    LOG_VERBOSE(TAG_TIME, F("NTP: %s %s %s"), ntp1.c_str(), ntp2.c_str(), ntp3.c_str());
+    printf("%s => %s", zone.c_str(), mytz.c_str());
+    printf("NTP: %s %s %s", ntp1.c_str(), ntp2.c_str(), ntp3.c_str());
 
     configTzTime(mytz.c_str(), ntp1.c_str(), ntp2.c_str(), ntp3.c_str());
     preferences.end();
@@ -71,9 +71,9 @@ String time_zone_to_possix(const char* timezone)
         offset += 14;
         if(offset >= 0 && offset < sizeof(gmt) / sizeof(gmt[0])) {
             sdbm = gmt[offset];
-            LOG_DEBUG(TAG_TIME, "Etc/GMT%d (%d)", offset - 14, sdbm);
+            printf("Etc/GMT%d (%d)", offset - 14, sdbm);
         } else {
-            LOG_WARNING(TAG_TIME, "Invalid offset Etc/GMT%d", offset - 14);
+            printf("Invalid offset Etc/GMT%d", offset - 14);
         }
     } else {
         sdbm = Parser::get_sdbm(timezone);
@@ -636,7 +636,7 @@ String time_zone_to_possix(const char* timezone)
             return "WITA-8";
     }
 #endif
-    LOG_WARNING(TAG_TIME, F("Timezone %s (%d) not found, using %s"), timezone, sdbm, MYTZ);
+    printf("Timezone %s (%d) not found, using %s", timezone, sdbm, MYTZ);
     return MYTZ;
 }
 

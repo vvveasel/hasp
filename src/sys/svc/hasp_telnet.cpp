@@ -78,11 +78,10 @@ static inline void telnet_username_prompt()
 static void telnetClientDisconnect()
 {
     if(telnetClient.connected())
-        LOG_TRACE(TAG_TELN, F(D_TELNET_CLOSING_CONNECTION), telnetClient.remoteIP().toString().c_str());
+        printf(D_TELNET_CLOSING_CONNECTION, telnetClient.remoteIP().toString().c_str());
     bufferedTelnetClient.flush(); // empty buffer
     telnetClient.flush();         // empty buffer
 
-    Log.unregisterOutput(1); // telnetClient
     telnetClient.stop();
 
     telnetLoginState   = TELNET_UNAUTHENTICATED;
@@ -111,8 +110,7 @@ void telnetClientLogon()
     telnetClient.flush();
 
     /* Now register logger for telnet and switch to buffered stream */
-    Log.registerOutput(1, &bufferedTelnetClient, LOG_LEVEL_VERBOSE, true);
-    LOG_TRACE(TAG_TELN, F(D_TELNET_CLIENT_LOGIN_FROM), telnetClient.remoteIP().toString().c_str());
+    printf(D_TELNET_CLIENT_LOGIN_FROM, telnetClient.remoteIP().toString().c_str());
 }
 
 void telnetAcceptClient()
@@ -121,14 +119,13 @@ void telnetAcceptClient()
 
     if(telnetClient) {
         telnetClient.stop();     // previous client has disconnected
-        Log.unregisterOutput(1); // telnetClient
     }
     telnetClient = telnetServer->available(); // ready for new client
     if(!telnetClient) {
-        LOG_VERBOSE(TAG_TELN, F(D_TELNET_CLIENT_NOT_CONNECTED));
+        printf(D_TELNET_CLIENT_NOT_CONNECTED);
         return;
     }
-    LOG_INFO(TAG_TELN, F(D_TELNET_CLIENT_CONNECT_FROM), telnetClient.remoteIP().toString().c_str());
+    printf(D_TELNET_CLIENT_CONNECT_FROM, telnetClient.remoteIP().toString().c_str());
     telnetClient.setNoDelay(true);
     telnetClient.printf("\x1b]2;%s\x07" TERM_CLEAR_LINE, haspDevice.get_hostname());
     telnetClient.println("\r\nWelcome\r\n");
@@ -263,7 +260,7 @@ static void telnetProcessLine(const char* input)
             } else {
                 telnetLoginState = TELNET_UNAUTHENTICATED;
                 telnetLoginAttempt++; // Subsequent attempt
-                LOG_WARNING(TAG_TELN, F(D_TELNET_INCORRECT_LOGIN_ATTEMPT), telnetClient.remoteIP().toString().c_str());
+                printf(D_TELNET_INCORRECT_LOGIN_ATTEMPT, telnetClient.remoteIP().toString().c_str());
 
                 telnetClient.println(F(D_NETWORK_CONNECTION_UNAUTHORIZED));
 
@@ -325,9 +322,9 @@ void telnetStart()
             //     LOG_INFO(TAG_TELN, F(D_TELNET_STARTED));
             //     return;
             // }
-            LOG_INFO(TAG_TELN, F(D_TELNET_STARTED));
+            printf(D_TELNET_STARTED);
         } else {
-            LOG_ERROR(TAG_TELN, F(D_TELNET_FAILED));
+            printf(D_TELNET_FAILED);
         }
 #endif
     }
@@ -387,7 +384,7 @@ void telnetLoop()
                 telnetConsole->setLineCallback(telnetProcessLine);
             } else {
                 telnetClientDisconnect();
-                LOG_ERROR(TAG_TELN, F(D_TELNET_FAILED));
+                printf(D_TELNET_FAILED);
             }
         }
     }
@@ -405,7 +402,7 @@ void telnetEverySecond(void)
         if(!telnetClient.connected()) {             // nobody is already connected
             telnetAcceptClient();                   // allow the new client
         } else {
-            LOG_WARNING(TAG_TELN, F(D_TELNET_CLIENT_REJECTED));
+            printf(D_TELNET_CLIENT_REJECTED);
             telnetServer->available().stop(); // already have a client, block new connections
         }
     }

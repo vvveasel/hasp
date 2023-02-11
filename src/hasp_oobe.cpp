@@ -70,7 +70,7 @@ static void kb_event_cb(lv_obj_t* event_kb, lv_event_t event)
 
         if(strlen(ssid) > 0 && wifiValidateSsid(ssid, pass)) {
             wifiSetConfig(settings.as<JsonObject>());
-            LOG_TRACE(TAG_OOBE, F(D_OOBE_SSID_VALIDATED), ssid);
+            printf(D_OOBE_SSID_VALIDATED, ssid);
             dispatch_reboot(true);
         }
 
@@ -315,10 +315,10 @@ bool oobeSetup()
         lv_obj_set_click(lv_disp_get_layer_sys(NULL), true);
         if(oobeAutoCalibrate) {
             lv_obj_set_event_cb(lv_disp_get_layer_sys(NULL), oobe_calibrate_cb);
-            LOG_INFO(TAG_OOBE, F(D_OOBE_AUTO_CALIBRATE));
+            printf(D_OOBE_AUTO_CALIBRATE);
         } else {
             lv_obj_set_event_cb(lv_disp_get_layer_sys(NULL), gotoPage1_cb);
-            LOG_INFO(TAG_OOBE, F(D_OOBE_CALIBRATED));
+            printf(D_OOBE_CALIBRATED);
         }
         oobeSetPage(0);
         return true;
@@ -347,9 +347,9 @@ void oobeFakeSetup(const char*, const char*, uint8_t source)
     if(oobeAutoCalibrate) {
         lv_obj_set_click(lv_disp_get_layer_sys(NULL), true);
         lv_obj_set_event_cb(lv_disp_get_layer_sys(NULL), oobe_calibrate_cb);
-        LOG_INFO(TAG_OOBE, F(D_OOBE_AUTO_CALIBRATE));
+        printf(D_OOBE_AUTO_CALIBRATE);
     } else {
-        LOG_INFO(TAG_OOBE, F(D_OOBE_CALIBRATED));
+        printf(D_OOBE_CALIBRATED);
     }
 #endif
 }

@@ -230,7 +230,7 @@ static int read_label(lv_fs_file_t* fp, int start, const char* label)
 
     if(lv_fs_read(fp, &length, 4, NULL) != LV_FS_RES_OK || lv_fs_read(fp, buf, 4, NULL) != LV_FS_RES_OK ||
        memcmp(label, buf, 4) != 0) {
-        LOG_WARNING(TAG_FONT, "Error reading '%s' label.", label);
+        printf("Error reading '%s' label.", label);
         return -1;
     }
 
@@ -297,7 +297,7 @@ static bool load_cmaps_tables(lv_fs_file_t* fp, lv_font_fmt_txt_dsc_t* font_dsc,
                 break;
             }
             default:
-                LOG_WARNING(TAG_FONT, "Unknown cmaps format type %d.", cmap_table[i].format_type);
+                printf("Unknown cmaps format type %d.", cmap_table[i].format_type);
                 return false;
         }
     }
@@ -542,7 +542,7 @@ static bool lvgl_load_font(lv_fs_file_t* fp, lv_font_t* font)
             failed = true;
         }
     } else {
-        LOG_WARNING(TAG_FONT, "Unknown index_to_loc_format: %d.", font_header.index_to_loc_format);
+        printf("Unknown index_to_loc_format: %d.", font_header.index_to_loc_format);
         failed = true;
     }
 

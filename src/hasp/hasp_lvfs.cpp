@@ -12,23 +12,23 @@ void filesystem_list_path(const char* path)
     lv_fs_res_t res;
     res = lv_fs_dir_open(&dir, path);
     if(res != LV_FS_RES_OK) {
-        LOG_ERROR(TAG_LVFS, "Error opening directory %s", path);
+        printf("Error opening directory %s", path);
     } else {
         char fn[256];
         while(1) {
             res = lv_fs_dir_read(&dir, fn);
             if(res != LV_FS_RES_OK) {
-                LOG_ERROR(TAG_LVFS, "Directory %s can not be read", path);
+                printf("Directory %s can not be read", path);
                 break;
             }
 
             /*fn is empty, if not more files to read*/
             if(strlen(fn) == 0) {
-                LOG_WARNING(TAG_LVFS, "Directory %s listing complete", path);
+                printf("Directory %s listing complete", path);
                 break;
             }
 
-            LOG_VERBOSE(TAG_LVFS, D_BULLET "%s", fn);
+            printf(D_BULLET "%s", fn);
         }
     }
 

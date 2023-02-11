@@ -5,7 +5,7 @@
 #define HASP_DEVICE_H
 
 #ifdef ARDUINO
-#include "Arduino.h"
+//#include "Arduino.h"
 #endif
 
 #if defined(WINDOWS) || defined(POSIX)
